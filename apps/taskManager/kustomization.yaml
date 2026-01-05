@@ -1,5 +1,12 @@
 resources:
   - deployment.yaml
+  - service.yaml
+  - appService.yaml
+  - ingress.yaml
+  - secrets.yaml
+  - pgsqlDeployment.yaml
+  - pgsqlService.yaml
+  - pvc.yaml
 
 images:
   - name: ghcr.io/pestana1213/manager
