@@ -20,3 +20,16 @@ spec:
           image: ghcr.io/pestana1213/manager
           ports:
             - containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://controlhub-db:5432/controlhub
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: controlhub-db-secret
+                  key: POSTGRES_USER
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: controlhub-db-secret
+                  key: POSTGRES_PASSWORD
