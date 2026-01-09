@@ -9,7 +9,7 @@ spec:
   source:
     repoURL: https://github.com/pestana1213/golias-homelab
     targetRevision: main  
-    path: apps/homepage 
+    path: apps/homePage 
   destination:
     server: https://kubernetes.default.svc
     namespace: homepage
