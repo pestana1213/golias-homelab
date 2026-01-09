@@ -22,7 +22,7 @@ data:
           columns: 3
       - Daily Info:
           style: row
-          columns: 1
+          columns: 2
       - Services:
           style: row
           columns: 3
@@ -39,7 +39,7 @@ data:
             href: http://prometheus.local
             description: Metrics collection
     
-    - Daily Info:        
+    - Daily Info: 
         - My Calendar:
             icon: mdi-calendar
             description: Events and schedules
@@ -61,13 +61,14 @@ data:
   
   widgets.yaml: |
     - openmeteo:
-      label: Fafe
-      latitude: 41.45
-      longitude: -8.17
-      timezone: Europe/Lisbon
-      units: metric
-      cache: 5
-
+      label: Kyiv # optional
+      latitude: 50.449684
+      longitude: 30.525026
+      timezone: Europe/Kiev # optional
+      units: metric # or imperial
+      cache: 5 # Time in minutes to cache API responses, to stay within limits
+      format: # optional, Intl.NumberFormat options
+        maximumFractionDigits: 1
     - kubernetes:
         cluster:
           show: true
