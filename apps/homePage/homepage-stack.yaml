@@ -84,20 +84,6 @@ data:
         format:
           timeStyle: short
           dateStyle: long
-    
-    - calendar:
-        firstDayInWeek: monday
-        view: monthly
-        maxEvents: 10
-        showTime: true
-        timezone: Europe/Lisbon
-        integrations:
-          - type: ical
-            url: https://calendar.google.com/calendar/ical/pt.portuguese%23holiday%40group.v.calendar.google.com/public/basic.ics
-            name: Portuguese Holidays
-            color: blue
-            params:
-              showName: true
   
   kubernetes.yaml: |
     mode: cluster
