@@ -20,9 +20,6 @@ data:
       - Monitoring:
           style: row
           columns: 3
-      - Calendar:
-          style: row
-          columns: 2
       - Services:
           style: row
           columns: 3
@@ -57,13 +54,7 @@ data:
                   color: blue
                   params:
                     showName: true
-        - openmeteo:
-          label: Fafe Weather 
-          latitude: 50.449684
-          longitude: 30.525026
-          timezone: Europe/Lisbon
-          units: metric # or imperial
-          cache: 5
+          
   
   widgets.yaml: |
     - kubernetes:
