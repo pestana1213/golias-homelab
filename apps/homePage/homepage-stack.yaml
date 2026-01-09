@@ -35,18 +35,28 @@ data:
             icon: prometheus.png
             href: http://prometheus.local
             description: Metrics collection
-    
-    - calendar:
-        firstDayInWeek: monday
-        view: monthly
-        maxEvents: 10
-        showTime: true
-        timezone: Europe/Lisbon
-        integrations:
-          - type: ical
-            url: https://calendar.google.com/calendar/ical/pt.portuguese%23holiday%40group.v.calendar.google.com/public/basic.ics
-            name: Portuguese Holidays
-            color: blue
+    - Daily:
+        - Weather:
+            icon: weather.png
+            href: https://www.accuweather.com/
+            description: Local weather updates
+        
+        - News:
+            icon: news.png
+            href: https://news.google.com/
+            description: Latest news headlines
+            
+        - calendar:
+            firstDayInWeek: monday
+            view: monthly
+            maxEvents: 10
+            showTime: true
+            timezone: Europe/Lisbon
+            integrations:
+              - type: ical
+                url: https://calendar.google.com/calendar/ical/pt.portuguese%23holiday%40group.v.calendar.google.com/public/basic.ics
+                name: Portuguese Holidays
+                color: blue
   
   widgets.yaml: |
     - kubernetes:
