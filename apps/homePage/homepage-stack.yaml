@@ -30,11 +30,6 @@ data:
             icon: grafana.png
             href: http://grafana.local
             description: Metrics and dashboards
-            widget:
-              type: grafana
-              url: http://kube-prometheus-stack-grafana.monitoring.svc.cluster.local
-              username: admin
-              password: admin
         
         - Prometheus:
             icon: prometheus.png
