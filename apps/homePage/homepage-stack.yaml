@@ -36,16 +36,6 @@ data:
             href: http://prometheus.local
             description: Metrics collection
     - Daily:
-        - Weather:
-            icon: weather.png
-            href: https://www.accuweather.com/
-            description: Local weather updates
-        
-        - News:
-            icon: news.png
-            href: https://news.google.com/
-            description: Latest news headlines
-            
         - calendar:
             firstDayInWeek: monday
             view: monthly
