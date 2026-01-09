@@ -20,6 +20,9 @@ data:
       - Monitoring:
           style: row
           columns: 3
+      - Calendar:
+          style: row
+          columns: 2
       - Services:
           style: row
           columns: 3
@@ -35,18 +38,25 @@ data:
             icon: prometheus.png
             href: http://prometheus.local
             description: Metrics collection
-    - Daily:
-        - calendar:
-            firstDayInWeek: monday
-            view: monthly
-            maxEvents: 10
-            showTime: true
-            timezone: Europe/Lisbon
-            integrations:
-              - type: ical
-                url: https://calendar.google.com/calendar/ical/pt.portuguese%23holiday%40group.v.calendar.google.com/public/basic.ics
-                name: Portuguese Holidays
-                color: blue
+    
+    - Calendar:
+        - My Calendar:
+            icon: mdi-calendar
+            description: Events and schedules
+            widget:
+              type: calendar
+              firstDayInWeek: monday
+              view: monthly
+              maxEvents: 10
+              showTime: true
+              timezone: Europe/Lisbon
+              integrations:
+                - type: ical
+                  url: https://calendar.google.com/calendar/ical/pt.portuguese%23holiday%40group.v.calendar.google.com/public/basic.ics
+                  name: Portuguese Holidays
+                  color: blue
+                  params:
+                    showName: true
   
   widgets.yaml: |
     - kubernetes:
@@ -66,6 +76,20 @@ data:
         format:
           timeStyle: short
           dateStyle: long
+    
+    - calendar:
+        firstDayInWeek: monday
+        view: monthly
+        maxEvents: 10
+        showTime: true
+        timezone: Europe/Lisbon
+        integrations:
+          - type: ical
+            url: https://calendar.google.com/calendar/ical/pt.portuguese%23holiday%40group.v.calendar.google.com/public/basic.ics
+            name: Portuguese Holidays
+            color: blue
+            params:
+              showName: true
   
   kubernetes.yaml: |
     mode: cluster
