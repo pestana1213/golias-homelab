@@ -16,6 +16,13 @@ data:
     headerStyle: boxed
     theme: dark
     color: slate
+    background:
+      image: https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?auto=format&fit=crop&w=2000&q=80
+      blur: md
+      saturate: 50
+      brightness: 50
+      opacity: 20
+    cardBlur: md
     layout:
       - Monitoring:
           style: row
@@ -40,7 +47,7 @@ data:
             description: Metrics collection
     
     - Calendar:
-        - Calendar:
+        - Portuguese Calendar:
             icon: mdi-calendar
             description: Events and schedules
             widget:
