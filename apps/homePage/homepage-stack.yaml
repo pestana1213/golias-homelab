@@ -57,6 +57,13 @@ data:
                   color: blue
                   params:
                     showName: true
+          - openmeteo:
+            label: Fafe Weather 
+            latitude: 50.449684
+            longitude: 30.525026
+            timezone: Europe/Lisbon
+            units: metric # or imperial
+            cache: 5
   
   widgets.yaml: |
     - kubernetes:
