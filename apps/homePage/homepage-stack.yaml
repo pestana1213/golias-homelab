@@ -20,6 +20,9 @@ data:
       - Monitoring:
           style: row
           columns: 3
+      - Daily Info:
+          style: row
+          columns: 1
       - Services:
           style: row
           columns: 3
@@ -36,7 +39,7 @@ data:
             href: http://prometheus.local
             description: Metrics collection
     
-    - Calendar:
+    - Daily Info:        
         - My Calendar:
             icon: mdi-calendar
             description: Events and schedules
@@ -57,6 +60,14 @@ data:
           
   
   widgets.yaml: |
+    - openmeteo:
+      label: Fafe
+      latitude: 41.45
+      longitude: -8.17
+      timezone: Europe/Lisbon
+      units: metric
+      cache: 5
+
     - kubernetes:
         cluster:
           show: true
