@@ -147,13 +147,19 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /app/config
+            - name: logs
+              mountPath: /app/config/logs
           env:
             - name: TZ
               value: Europe/Lisbon
+            - name: HOMEPAGE_ALLOWED_HOSTS
+              value: home.local,192.168.1.225
       volumes:
         - name: config
           configMap:
             name: homepage-config
+        - name: logs
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
