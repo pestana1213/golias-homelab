@@ -60,14 +60,10 @@ data:
           timeStyle: short
           dateStyle: long
   
-  bookmarks.yaml: |
-    - Developer:
-        - Github:
-            - icon: github.png
-              href: https://github.com/
-        - Documentation:
-            - icon: readthedocs.png
-              href: https://docs.k3s.io/
+  kubernetes.yaml: |
+    mode: cluster
+  
+  docker.yaml: ""
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -137,6 +133,19 @@ spec:
         app: homepage
     spec:
       serviceAccountName: homepage
+      initContainers:
+        - name: config-setup
+          image: busybox:latest
+          command: ['sh', '-c']
+          args:
+            - |
+              cp /tmp/config/* /app/config/ 2>/dev/null || true
+              chmod -R 777 /app/config
+          volumeMounts:
+            - name: config-source
+              mountPath: /tmp/config
+            - name: config
+              mountPath: /app/config
       containers:
         - name: homepage
           image: ghcr.io/gethomepage/homepage:latest
@@ -155,9 +164,11 @@ spec:
             - name: HOMEPAGE_ALLOWED_HOSTS
               value: home.local,192.168.1.225
       volumes:
-        - name: config
+        - name: config-source
           configMap:
             name: homepage-config
+        - name: config
+          emptyDir: {}
         - name: logs
           emptyDir: {}
 ---
