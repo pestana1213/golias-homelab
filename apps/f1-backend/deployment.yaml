@@ -17,7 +17,7 @@ spec:
         - name: ghcr
       containers:
         - name: f1-backend
-          image: ghcr.io/pestana1213/f1-backend
+          image: ghcr.io/pestana1213/f1-service
           ports:
             - containerPort: 8080
           env:
