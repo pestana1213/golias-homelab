@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: f1-backend
+  namespace: f1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: f1-backend
+  template:
+    metadata:
+      labels:
+        app: f1-backend
+    spec:
+      imagePullSecrets:
+        - name: ghcr
+      containers:
+        - name: f1-backend
+          image: ghcr.io/pestana1213/f1-backend
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5

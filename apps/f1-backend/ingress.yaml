@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: f1-backend-ingress
+  namespace: f1
+  annotations:
+    cosmo-controller.cosmo.red/main: "true"
+spec:
+  ingressClassName: cosmo
+  rules:
+    - host: f1-api.pestana.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: f1-backend-service
+                port:
+                  number: 8080
