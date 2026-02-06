@@ -1,0 +1,242 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: homepage
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homepage-config
+  namespace: homepage
+data:
+  settings.yaml: |
+    title: Homelab Dashboard
+    favicon: https://gethomepage.dev/img/favicon.ico
+    headerStyle: boxed
+    theme: dark
+    color: slate
+    background:
+      image: https://images.unsplash.com/photo-1419242902214-272b3f66ee7a?auto=format&fit=crop&w=2000&q=80
+      blur: md
+      saturate: 50
+      brightness: 50
+      opacity: 20
+    cardBlur: md
+    layout:
+      - Monitoring:
+          style: row
+          columns: 3
+      - Calendar:
+          style: row
+          columns: 2
+      - Services:
+          style: row
+          columns: 3
+  
+  services.yaml: |
+    - Monitoring:
+        - Grafana:
+            icon: grafana.png
+            href: http://grafana.local
+            description: Metrics and dashboards
+        
+        - Prometheus:
+            icon: prometheus.png
+            href: http://prometheus.local
+            description: Metrics collection
+    
+    - Calendar:
+        - Portuguese Calendar:
+            icon: mdi-calendar
+            description: Events and schedules
+            widget:
+              type: calendar
+              firstDayInWeek: monday
+              view: monthly
+              maxEvents: 10
+              showTime: true
+              timezone: Europe/Lisbon
+              integrations:
+                - type: ical
+                  url: https://calendar.google.com/calendar/ical/pt.portuguese%23holiday%40group.v.calendar.google.com/public/basic.ics
+                  name: Portuguese Holidays
+                  color: blue
+                  params:
+                    showName: true
+  
+  widgets.yaml: |
+    - openmeteo:
+        label: Fafe
+        latitude: 41.45
+        longitude: -8.17
+        timezone: Europe/Lisbon
+        units: metric
+        cache: 5
+    
+    - kubernetes:
+        cluster:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+        nodes:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+    
+    - datetime:
+        text_size: xl
+        format:
+          timeStyle: short
+          dateStyle: long
+  
+  kubernetes.yaml: |
+    mode: cluster
+  
+  docker.yaml: ""
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: homepage
+  namespace: homepage
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: homepage
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - namespaces
+      - pods
+      - nodes
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - extensions
+      - networking.k8s.io
+    resources:
+      - ingresses
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - metrics.k8s.io
+    resources:
+      - nodes
+      - pods
+    verbs:
+      - get
+      - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: homepage
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: homepage
+subjects:
+  - kind: ServiceAccount
+    name: homepage
+    namespace: homepage
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homepage
+  namespace: homepage
+  labels:
+    app: homepage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: homepage
+  template:
+    metadata:
+      labels:
+        app: homepage
+    spec:
+      serviceAccountName: homepage
+      initContainers:
+        - name: config-setup
+          image: busybox:latest
+          command: ['sh', '-c']
+          args:
+            - |
+              cp /tmp/config/* /app/config/ 2>/dev/null || true
+              chmod -R 777 /app/config
+          volumeMounts:
+            - name: config-source
+              mountPath: /tmp/config
+            - name: config
+              mountPath: /app/config
+      containers:
+        - name: homepage
+          image: ghcr.io/gethomepage/homepage:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+              name: http
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+            - name: logs
+              mountPath: /app/config/logs
+          env:
+            - name: TZ
+              value: Europe/Lisbon
+            - name: HOMEPAGE_ALLOWED_HOSTS
+              value: home.local,192.168.1.225
+      volumes:
+        - name: config-source
+          configMap:
+            name: homepage-config
+        - name: config
+          emptyDir: {}
+        - name: logs
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: homepage
+  namespace: homepage
+  labels:
+    app: homepage
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000
+      targetPort: 3000
+      protocol: TCP
+      name: http
+  selector:
+    app: homepage
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: homepage-ingress
+  namespace: homepage
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+spec:
+  rules:
+    - host: home.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: homepage
+                port:
+                  number: 3000
