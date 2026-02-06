@@ -3,10 +3,7 @@ kind: Ingress
 metadata:
   name: f1-frontend-ingress
   namespace: f1
-  annotations:
-    cosmo-controller.cosmo.red/main: "true"
 spec:
-  ingressClassName: cosmo
   rules:
     - host: f1.pestana.io
       http:
