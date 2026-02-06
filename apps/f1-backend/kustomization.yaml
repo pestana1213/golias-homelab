@@ -5,4 +5,4 @@ resources:
 
 images:
   - name: ghcr.io/pestana1213/f1-backend
-    newTag: latest
+    newTag: ca33cc5ab82846f6a12b785fe64d54d90da596ae
