@@ -1,0 +1,8 @@
+resources:
+  - namespace.yaml
+  - secret.yaml
+  - postgres.yaml
+  - redis.yaml
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
