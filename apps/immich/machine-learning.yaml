@@ -38,7 +38,6 @@ spec:
             periodSeconds: 30
           securityContext:
             allowPrivilegeEscalation: false
-            runAsNonRoot: true
             capabilities:
               drop: ["ALL"]
           resources:
