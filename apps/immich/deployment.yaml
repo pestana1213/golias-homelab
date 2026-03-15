@@ -46,9 +46,28 @@ spec:
               value: immich-redis
             - name: UPLOAD_LOCATION
               value: /usr/src/app/upload
+            - name: IMMICH_MACHINE_LEARNING_URL
+              value: http://immich-machine-learning:3003
           volumeMounts:
             - name: library
               mountPath: /usr/src/app/upload
+          readinessProbe:
+            httpGet:
+              path: /api/server/ping
+              port: 2283
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /api/server/ping
+              port: 2283
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            capabilities:
+              drop: ["ALL"]
           resources:
             requests:
               memory: "512Mi"

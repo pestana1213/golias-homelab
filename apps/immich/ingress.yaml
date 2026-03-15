@@ -3,7 +3,13 @@ kind: Ingress
 metadata:
   name: immich-ingress
   namespace: immich
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
+  tls:
+    - hosts:
+        - immich.pestana.io
+      secretName: immich-tls
   rules:
     - host: immich.pestana.io
       http:

@@ -4,5 +4,7 @@ resources:
   - postgres.yaml
   - redis.yaml
   - deployment.yaml
+  - machine-learning.yaml
   - service.yaml
   - ingress.yaml
+  - pdb.yaml
