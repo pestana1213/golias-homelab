@@ -4,11 +4,9 @@ kind: Ingress
 metadata:
   name: grafana-ingress-v2
   namespace: monitoring
-  annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web
 spec:
   rules:
-    - host: grafana.local  # Or use your server's IP
+    - host: grafana.pestana.io
       http:
         paths:
           - path: /
@@ -24,11 +22,9 @@ kind: Ingress
 metadata:
   name: prometheus-ingress-v2
   namespace: monitoring
-  annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web
 spec:
   rules:
-    - host: prometheus.local
+    - host: prometheus.pestana.io
       http:
         paths:
           - path: /
