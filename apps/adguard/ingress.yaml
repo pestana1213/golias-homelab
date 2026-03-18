@@ -5,7 +5,7 @@ metadata:
   namespace: adguard
 spec:
   rules:
-    - host: adguard.pestana.io
+    - host: adguard.golias.home
       http:
         paths:
           - path: /

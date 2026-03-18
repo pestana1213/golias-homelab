@@ -5,7 +5,7 @@ metadata:
   namespace: f1
 spec:
   rules:
-    - host: f1.pestana.io
+    - host: f1.golias.home
       http:
         paths:
           - path: /

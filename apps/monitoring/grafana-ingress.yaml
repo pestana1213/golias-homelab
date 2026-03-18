@@ -6,7 +6,7 @@ metadata:
   namespace: monitoring
 spec:
   rules:
-    - host: grafana.pestana.io
+    - host: grafana.golias.home
       http:
         paths:
           - path: /
@@ -24,7 +24,7 @@ metadata:
   namespace: monitoring
 spec:
   rules:
-    - host: prometheus.pestana.io
+    - host: prometheus.golias.home
       http:
         paths:
           - path: /

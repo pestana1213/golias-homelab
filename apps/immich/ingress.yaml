@@ -5,7 +5,7 @@ metadata:
   namespace: immich
 spec:
   rules:
-    - host: immich.pestana.io
+    - host: immich.golias.home
       http:
         paths:
           - path: /
