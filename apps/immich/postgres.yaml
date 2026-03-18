@@ -50,6 +50,8 @@ spec:
             failureThreshold: 5
           args:
             - "-c"
+            - "shared_preload_libraries=vectors.so"
+            - "-c"
             - "shared_buffers=128MB"
             - "-c"
             - "work_mem=16MB"
