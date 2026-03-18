@@ -39,19 +39,28 @@ spec:
           readinessProbe:
             exec:
               command: ["pg_isready", "-U", "immich", "-d", "immich"]
-            initialDelaySeconds: 10
-            periodSeconds: 5
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 10
           livenessProbe:
             exec:
               command: ["pg_isready", "-U", "immich", "-d", "immich"]
-            initialDelaySeconds: 30
-            periodSeconds: 10
+            initialDelaySeconds: 120
+            periodSeconds: 30
+            failureThreshold: 5
+          args:
+            - "-c"
+            - "shared_buffers=128MB"
+            - "-c"
+            - "work_mem=16MB"
+            - "-c"
+            - "maintenance_work_mem=128MB"
           resources:
             requests:
               memory: "512Mi"
               cpu: "250m"
             limits:
-              memory: "1Gi"
+              memory: "2Gi"
               cpu: "500m"
   volumeClaimTemplates:
     - metadata:
