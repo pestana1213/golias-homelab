@@ -46,8 +46,8 @@ spec:
               value: immich-redis
             - name: UPLOAD_LOCATION
               value: /usr/src/app/upload
-            - name: IMMICH_MACHINE_LEARNING_URL
-              value: http://immich-machine-learning:3003
+            - name: IMMICH_MACHINE_LEARNING_ENABLED
+              value: "false"
           volumeMounts:
             - name: library
               mountPath: /usr/src/app/upload
