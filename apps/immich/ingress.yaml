@@ -3,10 +3,15 @@ kind: Ingress
 metadata:
   name: immich-ingress
   namespace: immich
+  annotations:
+    tailscale.com/hostname: immich
 spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - immich
   rules:
-    - host: immich.golias.home
-      http:
+    - http:
         paths:
           - path: /
             pathType: Prefix
