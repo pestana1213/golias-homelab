@@ -30,10 +30,13 @@ Namespace: `vaultwarden`
 
 ### secret.yaml
 Opaque secret `vaultwarden-secret` in namespace `vaultwarden`.
-Key: `admin-token` — plaintext value (Vaultwarden hashes it internally at runtime).
+Uses `stringData` (not base64-encoded `data`), matching the immich-secret pattern.
+Key: `admin-token` — plaintext value. Note: since Vaultwarden 1.28.0, passing a raw (unhashed) token triggers a deprecation warning in the container logs recommending use of an argon2-hashed token. For a homelab this is acceptable — admin panel access still works correctly. The warning can be resolved later by replacing the token value with an argon2 hash.
 Pattern matches `immich-secret`.
 
 ### deployment.yaml
+Contains two documents separated by `---`, following the immich pattern: the PVC manifest first, then the Deployment manifest. No separate `pvc.yaml` file.
+
 - **PVC:** `vaultwarden-data-pvc`, `1Gi`, `ReadWriteOnce`, mounted at `/data`
 - **Deployment:** `vaultwarden`, 1 replica
 - **Image:** `vaultwarden/server:latest`
