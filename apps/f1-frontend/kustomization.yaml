@@ -5,4 +5,4 @@ resources:
 
 images:
   - name: ghcr.io/pestana1213/f1-app
-    newTag: 446c2b135f9c44e0f74d6c14f520943aa89b16cf
+    newTag: ddea82a730dca9751ee059b4a1dbd418e7752725
