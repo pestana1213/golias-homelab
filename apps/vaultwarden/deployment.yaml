@@ -39,7 +39,7 @@ spec:
                   name: vaultwarden-secret
                   key: admin-token
             - name: DOMAIN
-              value: http://password.golias.home
+              value: https://vaultwarden.tail654c62.ts.net
             - name: SIGNUPS_ALLOWED
               value: "true"
           volumeMounts:
