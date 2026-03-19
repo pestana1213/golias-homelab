@@ -4,7 +4,7 @@ metadata:
   name: task-manager
 spec:
   rules:
-    - host: task-manager.local
+    - host: task-manager.golias.home
       http:
         paths:
           - path: /
