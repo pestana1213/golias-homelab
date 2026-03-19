@@ -3,10 +3,15 @@ kind: Ingress
 metadata:
   name: vaultwarden-ingress
   namespace: vaultwarden
+  annotations:
+    tailscale.com/hostname: vaultwarden
 spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - vaultwarden
   rules:
-    - host: password.golias.home
-      http:
+    - http:
         paths:
           - path: /
             pathType: Prefix
