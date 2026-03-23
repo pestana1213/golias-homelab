@@ -1,0 +1,5 @@
+# Tailscale Kubernetes Operator
+# https://tailscale.com/kb/1236/kubernetes-operator
+#
+# OAuth credentials are NOT stored here.
+# Pass them at install time via --set (see README.md).
