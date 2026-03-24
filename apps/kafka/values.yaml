@@ -1,0 +1,5 @@
+# Strimzi Kafka Operator
+# https://strimzi.io/docs/operators/latest/overview.html
+#
+# The operator watches for Kafka CRDs (Kafka, KafkaTopic, KafkaUser, etc.)
+# Deploy a Kafka cluster by creating a Kafka resource in any watched namespace.

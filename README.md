@@ -8,6 +8,7 @@ Kubernetes homelab configuration managed with Kustomize and Helmfile.
 helmfile.yaml       # Helm-managed cluster dependencies (operators, controllers)
 apps/               # Application manifests (Kustomize)
   tailscale/        # Tailscale Kubernetes Operator
+  kafka/            # Strimzi Kafka Operator
   immich/           # Photo management
   vaultwarden/      # Password manager
   adguard/          # DNS ad blocker
