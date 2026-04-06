@@ -4,4 +4,4 @@ resources:
 
 images:
   - name: ghcr.io/joaonogureira/homelab-metrics
-    newTag: c8e5e3902d760827c66b913a4aab928937c3817f
+    newTag: 68b02f24854834b01013631fa5ee65470a9a8b24
