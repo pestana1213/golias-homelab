@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homelab-metrics
+  namespace: homelab-metrics
+  labels:
+    app: homelab-metrics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: homelab-metrics
+  template:
+    metadata:
+      labels:
+        app: homelab-metrics
+    spec:
+      hostPID: true
+      hostNetwork: true
+      containers:
+        - name: homelab-metrics
+          image: ghcr.io/joaonogureira/homelab-metrics:latest
+          env:
+            - name: HOMELAB_MQTT_BROKER_URL
+              value: "tcp://mosquitto.mosquitto.svc.cluster.local:1883"
+            - name: HOMELAB_METRICS_DISK_PATH
+              value: "/"
+            - name: HOMELAB_METRICS_PUBLISH_INTERVAL_MS
+              value: "5000"
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          volumeMounts:
+            - name: proc
+              mountPath: /proc
+              readOnly: true
+            - name: sys
+              mountPath: /sys
+              readOnly: true
+      volumes:
+        - name: proc
+          hostPath:
+            path: /proc
+        - name: sys
+          hostPath:
+            path: /sys
