@@ -18,7 +18,7 @@ spec:
       hostPID: true
       hostNetwork: true
       imagePullSecrets:
-        - name: ghcr-pull-secret
+        - name: ghcr
       containers:
         - name: homelab-metrics
           image: ghcr.io/joaonogureira/homelab-metrics:latest
