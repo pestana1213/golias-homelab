@@ -39,6 +39,22 @@ kubectl apply -k apps/<app-name>/
 for dir in apps/*/; do kubectl apply -k "$dir"; done
 ```
 
+## Mosquitto (MQTT)
+
+Mosquitto is exposed via NodePort for ESP32 devices on the LAN. To find the assigned port and node IP:
+
+```bash
+# Get the NodePort
+kubectl get svc mosquitto -n mosquitto -o jsonpath='{.spec.ports[0].nodePort}'
+
+# Get the node IP
+kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}'
+```
+
+Configure your ESP32 with:
+- **Broker host:** `<node IP>`
+- **Broker port:** `<NodePort>`
+
 ## Ingress
 
 Services are exposed via [Tailscale Ingress](https://tailscale.com/kb/1236/kubernetes-operator).
