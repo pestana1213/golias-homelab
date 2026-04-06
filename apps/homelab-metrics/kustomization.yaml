@@ -3,5 +3,5 @@ resources:
   - deployment.yaml
 
 images:
-  - name: ghcr.io/joaonogureira/rack-metrics
+  - name: ghcr.io/pestana1213/rack-metrics
     newTag: 68b02f24854834b01013631fa5ee65470a9a8b24

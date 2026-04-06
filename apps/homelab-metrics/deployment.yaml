@@ -21,7 +21,7 @@ spec:
         - name: ghcr
       containers:
         - name: homelab-metrics
-          image: ghcr.io/joaonogureira/rack-metrics
+          image: ghcr.io/pestana1213/rack-metrics
           env:
             - name: HOMELAB_MQTT_BROKER_URL
               value: "tcp://mosquitto.mosquitto.svc.cluster.local:1883"
