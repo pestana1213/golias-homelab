@@ -1,3 +1,7 @@
 resources:
   - namespace.yaml
   - deployment.yaml
+
+images:
+  - name: ghcr.io/joaonogureira/homelab-metrics
+    newTag: latest
