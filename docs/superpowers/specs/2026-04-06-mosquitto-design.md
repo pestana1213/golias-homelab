@@ -8,7 +8,7 @@ Add a Mosquitto MQTT broker to the homelab Kubernetes cluster for internal servi
 
 ## Requirements
 
-- Internal access only (no external exposure via Tailscale)
+- Accessible from the local network (LAN) for ESP32 devices on the same network as the cluster
 - Ephemeral (no persistent storage)
 - Anonymous connections allowed (no authentication)
 
@@ -30,13 +30,15 @@ All files under `apps/mosquitto/`:
 
 ## Networking
 
-- Service type: `ClusterIP`
+- Service type: `NodePort`
 - Port: `1883` (standard MQTT)
+- NodePort: auto-assigned by Kubernetes (range 30000–32767)
 - Internal DNS: `mosquitto.mosquitto.svc.cluster.local:1883`
+- LAN access: `<node-IP>:<assigned-nodePort>` — ESP32 devices connect via this address
 
 ## What is NOT included
 
 - No PVC (ephemeral)
 - No Secret (anonymous auth)
-- No Ingress (internal only)
+- No Tailscale Ingress
 - No helmfile entry (raw manifests only)
