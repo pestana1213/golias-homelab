@@ -1,10 +1,11 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: minecraft
   namespace: minecraft
 spec:
   replicas: 1
+  serviceName: minecraft-service
   selector:
     matchLabels:
       app: minecraft
@@ -40,7 +41,12 @@ spec:
               port: 25565
             initialDelaySeconds: 60
             periodSeconds: 10
-      volumes:
-        - name: minecraft-data
-          persistentVolumeClaim:
-            claimName: minecraft-data
+  volumeClaimTemplates:
+    - metadata:
+        name: minecraft-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: local-path
+        resources:
+          requests:
+            storage: 10Gi
