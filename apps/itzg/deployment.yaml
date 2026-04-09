@@ -20,9 +20,9 @@ spec:
             - name: EULA
               value: "TRUE"
             - name: TYPE
-              value: "PAPER"
+              value: "VANILLA"
             - name: VERSION
-              value: "LATEST"
+              value: "26.1"
             - name: MEMORY
               value: "4G"
           ports:
