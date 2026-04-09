@@ -1,12 +1,12 @@
 apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaTopic
 metadata:
-  name: golias-general-metrics-topic
+  name: golias-general-topic
   namespace: kafka
   labels:
     strimzi.io/cluster: kafka
 spec:
-  topicName: golias_general_metrics_topic
+  topicName: golias_general_topic
   partitions: 1
   replicas: 1
   config:
