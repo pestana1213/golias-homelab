@@ -14,7 +14,14 @@ spec:
       valuesObject:
         prometheus:
           prometheusSpec:
-            retention: 15d
+            retention: 3d
+            scrapeInterval: 60s
+            evaluationInterval: 60s
+            resources:
+              requests:
+                memory: 400Mi
+              limits:
+                memory: 600Mi
             storageSpec:
               volumeClaimTemplate:
                 spec:
@@ -26,7 +33,12 @@ spec:
             podMonitorSelectorNilUsesHelmValues: false
         grafana:
           enabled: true
-          adminPassword: admin  # Change this!
+          resources:
+            requests:
+              memory: 100Mi
+            limits:
+              memory: 200Mi
+          adminPassword: admin 
           persistence:
             enabled: true
             size: 5Gi
