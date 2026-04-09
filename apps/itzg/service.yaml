@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: minecraft-service
+  namespace: minecraft
+  annotations:
+    tailscale.com/expose: "true"
+    tailscale.com/hostname: "minecraft"
+spec:
+  selector:
+    app: minecraft
+  ports:
+    - port: 25565
+      targetPort: 25565
+      protocol: TCP
+  type: LoadBalancer
+  loadBalancerClass: tailscale
