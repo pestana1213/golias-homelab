@@ -47,6 +47,7 @@ spec:
           additionalDataSources:
             - name: Loki
               type: loki
+              uid: loki
               url: http://loki-stack:3100
               access: proxy
               isDefault: false
@@ -75,6 +76,18 @@ spec:
               node-exporter:
                 gnetId: 1860
                 revision: 37
+                datasource: Prometheus
+              kubernetes-views-global:
+                gnetId: 15757
+                revision: 37
+                datasource: Prometheus
+              kubernetes-views-namespaces:
+                gnetId: 15758
+                revision: 35
+                datasource: Prometheus
+              alertmanager-overview:
+                gnetId: 9578
+                revision: 4
                 datasource: Prometheus
         alertmanager:
           enabled: true
