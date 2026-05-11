@@ -51,7 +51,7 @@ data:
               type: grafana
               url: http://kube-prometheus-stack-grafana.monitoring.svc.cluster.local
               username: admin
-              password: admin
+              password: "{{HOMEPAGE_VAR_GRAFANA_PASSWORD}}"
 
         - Prometheus:
             icon: prometheus.png
@@ -230,6 +230,11 @@ spec:
               value: Europe/Lisbon
             - name: HOMEPAGE_ALLOWED_HOSTS
               value: home.local,192.168.1.225
+            - name: HOMEPAGE_VAR_GRAFANA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: homepage-grafana
+                  key: password
       volumes:
         - name: config-source
           configMap:
