@@ -38,7 +38,10 @@ spec:
               memory: 100Mi
             limits:
               memory: 200Mi
-          adminPassword: admin 
+          admin:
+            existingSecret: grafana-admin-secret
+            userKey: admin-user
+            passwordKey: admin-password
           persistence:
             enabled: true
             size: 5Gi
