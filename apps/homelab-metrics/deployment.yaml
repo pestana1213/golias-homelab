@@ -14,6 +14,13 @@ spec:
     metadata:
       labels:
         app: homelab-metrics
+    metadata:
+      labels:
+        app: homelab-metrics
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
     spec:
       hostPID: true
       hostNetwork: true
@@ -22,6 +29,10 @@ spec:
       containers:
         - name: homelab-metrics
           image: ghcr.io/pestana1213/rack-metrics
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
           env:
             - name: HOMELAB_MQTT_BROKER_URL
               value: "tcp://192.168.1.225:31719"
@@ -29,6 +40,18 @@ spec:
               value: "/"
             - name: HOMELAB_METRICS_PUBLISH_INTERVAL_MS
               value: "5000"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 30
           resources:
             requests:
               memory: "128Mi"
