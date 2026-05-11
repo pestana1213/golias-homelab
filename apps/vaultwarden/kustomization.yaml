@@ -1,6 +1,6 @@
 resources:
   - namespace.yaml
-  - secret.yaml
+  - externalsecret.yaml
   - deployment.yaml
   - service.yaml
   - ingress.yaml

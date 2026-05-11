@@ -3,7 +3,8 @@ resources:
   - service.yaml
   - appService.yaml
   - ingress.yaml
-  - secrets.yaml
+  - externalsecret.yaml
+  - externalsecret-ghcr.yaml
   - pgsqlDeployment.yaml
   - pgsqlService.yaml
   - pvc.yaml

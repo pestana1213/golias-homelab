@@ -3,6 +3,7 @@ resources:
   - deployment.yaml
   - service.yaml
   - servicemonitor.yaml
+  - externalsecret.yaml
 
 images:
   - name: ghcr.io/pestana1213/rack-metrics

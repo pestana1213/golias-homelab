@@ -1,6 +1,6 @@
 resources:
   - namespace.yaml
-  - secret.yaml
+  - externalsecret.yaml
   - postgres.yaml
   - redis.yaml
   - deployment.yaml
