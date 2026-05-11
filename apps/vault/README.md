@@ -48,9 +48,30 @@ Immich deployment
 
 3. Remove the old `secret.yaml` from the kustomization and Git.
 
-## Initial setup (one-time)
+## Updating a secret
 
-After Vault restarts it will be sealed. Unseal with:
+1. In Vault UI: **Secrets → homelab → \<path\> → Create new version**
+2. Update the value and save
+3. ESO syncs automatically within the `refreshInterval` (default 1h), or force it immediately:
+   ```bash
+   kubectl annotate externalsecret <name> -n <namespace> force-sync=$(date +%s) --overwrite
+   ```
+
+If the secret is a database password, also update it in the database and restart the app:
+```bash
+kubectl exec -n <namespace> <postgres-pod> -- psql -U postgres -c \
+  "ALTER USER postgres WITH PASSWORD 'newpassword';"
+kubectl rollout restart deployment/<app> -n <namespace>
+```
+
+## Monitoring with k9s
+
+- `:externalsecrets` — check sync status across all namespaces, `SecretSynced` = healthy
+- `:clustersecretstores` — confirm `vault` shows `Valid` and `Ready: True`
+
+## Vault sealed after restart
+
+Every time `vault-helm-0` restarts (node reboot, crash, update), Vault becomes **sealed** and all ExternalSecrets will show `SecretSyncedError` in k9s. Unseal with:
 ```bash
 kubectl exec -n vault vault-helm-0 -- vault operator unseal <unseal-key>
 ```

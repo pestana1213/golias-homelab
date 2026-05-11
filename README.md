@@ -5,15 +5,17 @@ Kubernetes homelab configuration managed with Kustomize and Helmfile.
 ## Structure
 
 ```
-helmfile.yaml       # Helm-managed cluster dependencies (operators, controllers)
-apps/               # Application manifests (Kustomize)
-  tailscale/        # Tailscale Kubernetes Operator
-  kafka/            # Strimzi Kafka Operator
-  immich/           # Photo management
-  vaultwarden/      # Password manager
-  adguard/          # DNS ad blocker
-  monitoring/       # Grafana + Prometheus stack
-  homePage/         # Homepage dashboard
+helmfile.yaml           # Helm-managed cluster dependencies (operators, controllers)
+apps/
+  tailscale/            # Tailscale Kubernetes Operator
+  kafka/                # Strimzi Kafka Operator
+  immich/               # Photo management
+  vaultwarden/          # Password manager
+  adguard/              # DNS ad blocker
+  monitoring/           # Grafana + Prometheus stack
+  homePage/             # Homepage dashboard
+  vault/                # HashiCorp Vault — central secret store
+  external-secrets/     # External Secrets Operator — syncs Vault secrets to Kubernetes
   ...
 ```
 
@@ -54,6 +56,18 @@ kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP
 Configure your ESP32 with:
 - **Broker host:** `<node IP>`
 - **Broker port:** `<NodePort>`
+
+## Secret management
+
+Secrets are managed with [HashiCorp Vault](apps/vault/README.md) and External Secrets Operator.
+
+- Vault UI available at `https://vault` on the Tailscale network (login with root token)
+- Vault **reseals on every pod restart** — unseal with:
+  ```bash
+  kubectl exec -n vault vault-helm-0 -- vault operator unseal <unseal-key>
+  ```
+- Store the unseal key and root token in Vaultwarden
+- All app secrets are defined as `ExternalSecret` resources — ESO syncs them from Vault automatically
 
 ## Ingress
 
