@@ -14,9 +14,6 @@ spec:
     metadata:
       labels:
         app: homelab-metrics
-    metadata:
-      labels:
-        app: homelab-metrics
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "8080"
