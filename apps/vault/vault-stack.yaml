@@ -56,6 +56,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: vault
+                name: vault-helm
                 port:
                   number: 8200
