@@ -11,7 +11,7 @@ metadata:
   namespace: homepage
 data:
   settings.yaml: |
-    title: Homelab Dashboard
+    title: Golias Homelab
     favicon: https://gethomepage.dev/img/favicon.ico
     headerStyle: boxed
     theme: dark
@@ -23,33 +23,68 @@ data:
       brightness: 50
       opacity: 20
     cardBlur: md
+    quicklaunch:
+      searchDescriptions: true
+      hideInternetSearch: true
     layout:
       - Monitoring:
           style: row
           columns: 3
-      - Calendar:
+      - Apps:
           style: row
           columns: 2
-      - Services:
+      - Tools:
           style: row
-          columns: 3
+          columns: 2
+      - Calendar:
+          style: row
+          columns: 1
   
   services.yaml: |
     - Monitoring:
         - Grafana:
             icon: grafana.png
-            href: http://grafana.local
+            href: http://grafana.golias.home
             description: Metrics and dashboards
-        
+            siteMonitor: http://kube-prometheus-stack-grafana.monitoring.svc.cluster.local
+            widget:
+              type: grafana
+              url: http://kube-prometheus-stack-grafana.monitoring.svc.cluster.local
+              username: admin
+              password: admin
+
         - Prometheus:
             icon: prometheus.png
-            href: http://prometheus.local
+            href: http://prometheus.golias.home
             description: Metrics collection
-    
+            siteMonitor: http://kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090
+
+        - AdGuard Home:
+            icon: adguard-home.png
+            href: http://adguard.golias.home
+            description: DNS ad blocking
+            siteMonitor: http://adguard-service.adguard.svc.cluster.local
+            widget:
+              type: adguard
+              url: http://adguard-service.adguard.svc.cluster.local
+
+    - Apps:
+        - Vaultwarden:
+            icon: vaultwarden.png
+            href: https://vaultwarden
+            description: Password manager
+            siteMonitor: http://vaultwarden.vaultwarden.svc.cluster.local
+
+        - Immich:
+            icon: immich.png
+            href: https://immich
+            description: Photo library
+            siteMonitor: http://immich-service.immich.svc.cluster.local:2283
+
     - Calendar:
         - Portuguese Calendar:
-            icon: mdi-calendar
-            description: Events and schedules
+            icon: mdi-calendar-month
+            description: Events and public holidays
             widget:
               type: calendar
               firstDayInWeek: monday
@@ -61,7 +96,7 @@ data:
                 - type: ical
                   url: https://calendar.google.com/calendar/ical/pt.portuguese%23holiday%40group.v.calendar.google.com/public/basic.ics
                   name: Portuguese Holidays
-                  color: blue
+                  color: red
                   params:
                     showName: true
   
