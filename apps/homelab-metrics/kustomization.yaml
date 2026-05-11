@@ -6,4 +6,4 @@ resources:
 
 images:
   - name: ghcr.io/pestana1213/rack-metrics
-    newTag: d712b915fd1991fb42b290f1aaa84cc01a5c3c44
+    newTag: 87c167ea246efd033bb5af9eefd7d276272a17a7
