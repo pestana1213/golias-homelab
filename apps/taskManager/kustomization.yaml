@@ -13,6 +13,6 @@ resources:
 
 images:
   - name: ghcr.io/pestana1213/manager
-    newTag: 918af25fa836deed89347784a6e4c3387afcc61f
+    newTag: 4e075943493ff45a1ced5a542ec38575d8f41b31
   - name: ghcr.io/pestana1213/task-manager-web
     newTag: latest
