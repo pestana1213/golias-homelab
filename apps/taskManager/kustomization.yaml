@@ -11,4 +11,4 @@ resources:
 
 images:
   - name: ghcr.io/pestana1213/manager
-    newTag: e5ff16dbeba1aca569933f035586b17a8b1d8781
+    newTag: 6a25c623483d93b0d4031b3ce1c1c8ff88f914a6
