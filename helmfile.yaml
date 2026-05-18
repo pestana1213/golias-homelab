@@ -3,9 +3,6 @@ repositories:
     url: https://pkgs.tailscale.com/helmcharts
   - name: strimzi
     url: https://strimzi.io/charts/
-  - name: cosmo
-    url: oci://ghcr.io/wundergraph/cosmo/helm
-    oci: true
 
 releases:
   - name: tailscale-operator
@@ -22,9 +19,3 @@ releases:
     values:
       - apps/kafka/values.yaml
 
-  - name: cosmo
-    namespace: cosmo
-    createNamespace: true
-    chart: cosmo/cosmo
-    values:
-      - apps/cosmo/values.yaml

@@ -1,0 +1,114 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cosmo
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: oci://ghcr.io/wundergraph/cosmo/helm
+    chart: cosmo
+    targetRevision: "0.18.0"
+    helm:
+      valuesObject:
+        global:
+          helmTests:
+            enabled: false
+
+          seed:
+            enabled: true
+            apiKey: "cosmo_669b576aaadc10ee1ae81d9193425705"  # change this
+            userEmail: "admin@golias.home"
+            userPassword: "changeme"
+            firstName: "Admin"
+            lastName: "Golias"
+            organizationName: "golias"
+            organizationSlug: "golias"
+
+          studio:
+            enabled: true
+            port: 3000
+            webUrl: "https://cosmo-studio"
+
+          router:
+            enabled: false  # deployed per-app in task-manager namespace
+
+          controlplane:
+            enabled: true
+            port: 3001
+            webUrl: "https://cosmo-controlplane"
+            jwtSecret: "changeme-32-char-jwt-secret-here"
+            admissionJwtSecret: "changeme-32-char-admission-secret"
+
+          keycloak:
+            enabled: true
+            realm: "cosmo"
+            loginRealm: "master"
+            webUrl: "https://cosmo-keycloak"
+            apiUrl: "http://cosmo-keycloak-http:8080"
+            clientId: "studio"
+            adminUser: "admin"
+            adminPassword: "changeme"
+            port: 8080
+            database: "keycloak"
+            databaseSchema: "public"
+            databaseUsername: "postgres"
+            databasePassword: "changeme"
+            smtpServer:
+              auth: false
+              enabled: false
+
+          otelcollector:
+            enabled: true
+            port: 4318
+            webUrl: "http://cosmo-otelcollector:4318"
+
+          graphqlmetrics:
+            enabled: true
+            port: 4005
+            webUrl: "http://cosmo-graphqlmetrics:4005"
+
+          cdn:
+            enabled: true
+            port: 8787
+            webUrl: "http://cosmo-cdn:8787"
+
+          clickhouse:
+            enabled: true
+          redis:
+            enabled: true
+          postgresql:
+            enabled: true
+          minio:
+            enabled: true
+
+        ingress:
+          enabled: false  # Tailscale ingresses managed separately
+
+        controlplane:
+          configuration:
+            logLevel: "info"
+            allowedOrigins:
+              - "https://cosmo-studio"
+            authRedirectUri: "https://cosmo-controlplane/v1/auth/callback"
+            databaseUrl: "postgres://postgres:changeme@cosmo-postgresql:5432/controlplane"
+            clickhouseDsn: "http://default:changeme@cosmo-clickhouse:8123/?database=cosmo"
+            clickhouseMigrationDsn: "clickhouse://default:changeme@cosmo-clickhouse:9000/cosmo?dial_timeout=15s&max_execution_time=60"
+            redisHost: "cosmo-redis-master"
+            redisPort: 6379
+            s3StorageUrl: "http://minio:changeme@cosmo-minio:9000/cosmo"
+            s3ForcePathStyle: "true"
+            cdnBaseUrl: "http://cosmo-cdn:8787"
+            smtp:
+              enabled: false
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cosmo
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
