@@ -14,3 +14,25 @@ spec:
                 name: task-manager
                 port:
                   number: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: task-manager-tailscale-ingress
+  annotations:
+    tailscale.com/hostname: task-manager
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - task-manager
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: task-manager
+                port:
+                  number: 80
