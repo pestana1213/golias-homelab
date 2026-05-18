@@ -1,6 +1,5 @@
 resources:
   - deployment.yaml
-  - service.yaml
   - appService.yaml
   - frontend-deployment.yaml
   - frontend-service.yaml
