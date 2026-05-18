@@ -2,6 +2,8 @@ resources:
   - deployment.yaml
   - service.yaml
   - appService.yaml
+  - frontend-deployment.yaml
+  - frontend-service.yaml
   - ingress.yaml
   - externalsecret.yaml
   - externalsecret-ghcr.yaml
@@ -12,3 +14,5 @@ resources:
 images:
   - name: ghcr.io/pestana1213/manager
     newTag: 6a25c623483d93b0d4031b3ce1c1c8ff88f914a6
+  - name: ghcr.io/pestana1213/task-manager-web
+    newTag: latest

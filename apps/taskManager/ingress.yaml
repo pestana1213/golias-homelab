@@ -33,6 +33,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: task-manager
+                name: task-manager-frontend
                 port:
                   number: 80

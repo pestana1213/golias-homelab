@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: task-manager-frontend
+  namespace: task-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: task-manager-frontend
+  template:
+    metadata:
+      labels:
+        app: task-manager-frontend
+    spec:
+      imagePullSecrets:
+        - name: ghcr
+      containers:
+        - name: task-manager-frontend
+          image: ghcr.io/pestana1213/task-manager-web
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: 32Mi
+              cpu: 50m
+            limits:
+              memory: 64Mi
+              cpu: 100m
