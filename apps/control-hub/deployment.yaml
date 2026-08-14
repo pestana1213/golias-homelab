@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: control-hub
+  namespace: control-hub
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: control-hub
+  template:
+    metadata:
+      labels:
+        app: control-hub
+        name: control-hub
+    spec:
+      imagePullSecrets:
+        - name: ghcr
+      containers:
+        - name: control-hub
+          image: ghcr.io/pestana1213/control-hub
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"

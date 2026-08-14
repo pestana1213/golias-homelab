@@ -1,0 +1,7 @@
+resources:
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+images:
+  - name: ghcr.io/pestana1213/control-hub
+    newTag:

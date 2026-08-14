@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: control-ingress
+  namespace: control-hub
+  annotations:
+    tailscale.com/hostname: control-hub 
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - control-hub
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: control-hub
+                port:
+                  number: 80
