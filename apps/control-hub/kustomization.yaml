@@ -5,7 +5,7 @@ resources:
   - external-secret.yaml
   - postgres.yaml
   - postgres-service.yaml
-  - postgres-pvc.yaml
+  - pvc.yaml
   - external-db-secret.yaml
 images:
   - name: ghcr.io/pestana1213/control-hub
