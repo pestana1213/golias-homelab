@@ -3,31 +3,48 @@ kind: Deployment
 metadata:
   name: control-hub
   namespace: control-hub
+  labels:
+    app.kubernetes.io/name: control-hub
+    app.kubernetes.io/instance: control-hub
+    app.kubernetes.io/component: backend
+
 spec:
   replicas: 1
+
   selector:
     matchLabels:
-      app: control-hub
+      app.kubernetes.io/name: control-hub
+      app.kubernetes.io/instance: control-hub
+
   template:
     metadata:
       labels:
-        app: control-hub
-        name: control-hub
+        app.kubernetes.io/name: control-hub
+        app.kubernetes.io/instance: control-hub
+        app.kubernetes.io/component: backend
+
     spec:
       imagePullSecrets:
         - name: ghcr
+
       containers:
         - name: control-hub
           image: ghcr.io/pestana1213/control-hub
+
           ports:
-            - containerPort: 8080
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "prod"
+
           resources:
             requests:
               memory: "256Mi"
               cpu: "250m"
+
             limits:
               memory: "512Mi"
               cpu: "500m"
