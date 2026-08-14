@@ -5,19 +5,24 @@ metadata:
   namespace: control-hub
   labels:
     app: control-hub-postgres
+
 spec:
   replicas: 1
+
   selector:
     matchLabels:
       app: control-hub-postgres
+
   template:
     metadata:
       labels:
         app: control-hub-postgres
+
     spec:
       containers:
         - name: postgres
           image: postgres:17
+
           ports:
             - containerPort: 5432
               name: postgres
@@ -44,11 +49,12 @@ spec:
 
           resources:
             requests:
-              memory: 256Mi
-              cpu: 100m
+              memory: "256Mi"
+              cpu: "100m"
+
             limits:
-              memory: 512Mi
-              cpu: 500m
+              memory: "512Mi"
+              cpu: "500m"
 
       volumes:
         - name: postgres-data
