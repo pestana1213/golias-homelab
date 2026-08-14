@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: control-hub-postgres
+  namespace: control-hub
+spec:
+  selector:
+    app: control-hub-postgres
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432
+  type: ClusterIP

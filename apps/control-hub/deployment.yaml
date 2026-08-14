@@ -39,7 +39,17 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "prod"
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: control-hub-db
+                  key: username
 
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: control-hub-db
+                  key: password
           resources:
             requests:
               memory: "256Mi"
