@@ -9,4 +9,4 @@ resources:
   - external-db-secret.yaml
 images:
   - name: ghcr.io/pestana1213/control-hub
-    newTag: 509ab7f0c7559c0d850a200ac7463602047f4c51
+    newTag: 2686530bcb16bff62fcb2740320430acd31d5dcd
