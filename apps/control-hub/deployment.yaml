@@ -24,6 +24,8 @@ spec:
         app.kubernetes.io/component: backend
 
     spec:
+      serviceAccountName: control-hub
+
       imagePullSecrets:
         - name: ghcr
 
