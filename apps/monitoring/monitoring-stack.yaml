@@ -24,7 +24,7 @@ spec:
                     key: ZO_ROOT_USER_EMAIL
                   password:
                     name: openobserve-root
-                    key: ZO_ROOT_USER_PASSWORD
+                    key: OPENOBSERVE_INGEST_PASSWORD
                 queueConfig:
                   maxSamplesPerSend: 10000
             retention: 3d
@@ -270,7 +270,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: openobserve-root
-                  key: ZO_ROOT_USER_PASSWORD
+                  key: OPENOBSERVE_INGEST_PASSWORD
           mounts:
             varlog: true
           extraPorts:
@@ -409,9 +409,9 @@ spec:
 
               otelcol.processor.batch "apps" {
                 output {
-                  logs    = [otelcol.exporter.loki.apps.input, otelcol.exporter.otlp.openobserve.input]
-                  metrics = [otelcol.exporter.prometheus.apps.input, otelcol.exporter.otlp.openobserve.input]
-                  traces  = [otelcol.exporter.otlp.tempo.input, otelcol.exporter.otlp.openobserve.input]
+                  logs    = [otelcol.exporter.loki.apps.input, otelcol.exporter.otlphttp.openobserve.input]
+                  metrics = [otelcol.exporter.prometheus.apps.input, otelcol.exporter.otlphttp.openobserve.input]
+                  traces  = [otelcol.exporter.otlp.tempo.input, otelcol.exporter.otlphttp.openobserve.input]
                 }
               }
 
@@ -446,16 +446,12 @@ spec:
                 }
               }
 
-              otelcol.exporter.otlp "openobserve" {
+              otelcol.exporter.otlphttp "openobserve" {
                 client {
-                  endpoint = "openobserve-openobserve-standalone:5081"
+                  endpoint = "http://openobserve-openobserve-standalone:5080/api/default"
                   auth     = otelcol.auth.basic.openobserve.handler
                   headers = {
-                    "organization" = "default",
-                    "stream-name"  = "default",
-                  }
-                  tls {
-                    insecure = true
+                    "stream-name" = "default",
                   }
                 }
               }

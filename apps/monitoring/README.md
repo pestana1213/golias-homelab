@@ -39,3 +39,4 @@ root credentials come from the Vault secret `openobserve`, which must contain:
 
 - `root-email`: the root user's email address
 - `root-password`: the root user's password
+- `ingest-password`: the ingestion token shown by OpenObserve under Data Sources
