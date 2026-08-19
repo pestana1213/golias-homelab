@@ -1,0 +1,329 @@
+{
+  "version": 8,
+  "dashboardId": "7495906826580393984",
+  "title": "Control Hub",
+  "description": "Application registration, Kubernetes discovery, HTTP, JVM, and failure metrics for Control Hub.",
+  "role": "",
+  "owner": "joaonogueiracontacto@gmail.com",
+  "created": "2026-08-19T18:17:34.617Z",
+  "tabs": [
+    {
+      "tabId": "overview",
+      "name": "Overview",
+      "panels": [
+        {
+          "id": "control_hub_registrations",
+          "type": "line",
+          "title": "Application registrations",
+          "description": "Successful and failed application registrations per second.",
+          "config": {
+            "show_legends": true,
+            "legends_position": "bottom",
+            "unit": "custom",
+            "unit_custom": "ops/s",
+            "decimals": 3,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "sum by (status) (rate(control_hub_application_register_total[$__rate_interval]))",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "control_hub_application_register_total",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": { "filterType": "group", "logicalOperator": "AND", "conditions": [] },
+                "promql_operations": []
+              },
+              "config": { "promql_legend": "{{status}}", "query_label": "" }
+            }
+          ],
+          "layout": { "x": 0, "y": 0, "w": 48, "h": 14, "i": 1 },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        },
+        {
+          "id": "control_hub_exceptions",
+          "type": "line",
+          "title": "Exceptions",
+          "description": "Handled exceptions per second, grouped by type.",
+          "config": {
+            "show_legends": true,
+            "legends_position": "bottom",
+            "unit": "custom",
+            "unit_custom": "errors/s",
+            "decimals": 3,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "sum by (type) (rate(control_hub_exceptions_total[$__rate_interval]))",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "control_hub_exceptions_total",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": { "filterType": "group", "logicalOperator": "AND", "conditions": [] },
+                "promql_operations": []
+              },
+              "config": { "promql_legend": "{{type}}", "query_label": "" }
+            }
+          ],
+          "layout": { "x": 48, "y": 0, "w": 48, "h": 14, "i": 2 },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        },
+        {
+          "id": "control_hub_failures",
+          "type": "line",
+          "title": "Application operation failures",
+          "description": "Failures while loading or enriching registered applications.",
+          "config": {
+            "show_legends": true,
+            "legends_position": "bottom",
+            "unit": "custom",
+            "unit_custom": "errors/s",
+            "decimals": 3,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "sum by (method) (rate(control_hub_failure_total[$__rate_interval]))",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "control_hub_failure_total",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": { "filterType": "group", "logicalOperator": "AND", "conditions": [] },
+                "promql_operations": []
+              },
+              "config": { "promql_legend": "{{method}}", "query_label": "" }
+            }
+          ],
+          "layout": { "x": 0, "y": 14, "w": 48, "h": 14, "i": 3 },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        },
+        {
+          "id": "control_hub_discovery_rate",
+          "type": "line",
+          "title": "Kubernetes discovery throughput",
+          "description": "Timed discovery operations completed per second.",
+          "config": {
+            "show_legends": true,
+            "legends_position": "bottom",
+            "unit": "custom",
+            "unit_custom": "ops/s",
+            "decimals": 3,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "sum by (resource) (rate(control_hub_kubernetes_discovery_seconds_count[$__rate_interval]))",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "control_hub_kubernetes_discovery_seconds_count",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": { "filterType": "group", "logicalOperator": "AND", "conditions": [] },
+                "promql_operations": []
+              },
+              "config": { "promql_legend": "{{resource}}", "query_label": "" }
+            }
+          ],
+          "layout": { "x": 48, "y": 14, "w": 48, "h": 14, "i": 4 },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        },
+        {
+          "id": "control_hub_discovery_latency",
+          "type": "line",
+          "title": "Average Kubernetes discovery latency",
+          "description": "Mean duration of each discovery operation over the selected rate interval.",
+          "config": {
+            "show_legends": true,
+            "legends_position": "bottom",
+            "unit": "seconds",
+            "unit_custom": "",
+            "decimals": 3,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "sum by (resource) (rate(control_hub_kubernetes_discovery_seconds_sum[$__rate_interval])) / clamp_min(sum by (resource) (rate(control_hub_kubernetes_discovery_seconds_count[$__rate_interval])), 0.000001)",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "control_hub_kubernetes_discovery_seconds_sum",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": { "filterType": "group", "logicalOperator": "AND", "conditions": [] },
+                "promql_operations": []
+              },
+              "config": { "promql_legend": "{{resource}}", "query_label": "" }
+            }
+          ],
+          "layout": { "x": 0, "y": 28, "w": 48, "h": 14, "i": 5 },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        },
+        {
+          "id": "control_hub_http_rate",
+          "type": "line",
+          "title": "HTTP request rate",
+          "description": "Inbound requests grouped by HTTP status.",
+          "config": {
+            "show_legends": true,
+            "legends_position": "bottom",
+            "unit": "custom",
+            "unit_custom": "req/s",
+            "decimals": 3,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "sum by (status) (rate(http_server_requests_seconds_count{namespace=\"control-hub\"}[$__rate_interval]))",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "http_server_requests_seconds_count",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": { "filterType": "group", "logicalOperator": "AND", "conditions": [] },
+                "promql_operations": []
+              },
+              "config": { "promql_legend": "HTTP {{status}}", "query_label": "" }
+            }
+          ],
+          "layout": { "x": 48, "y": 28, "w": 48, "h": 14, "i": 6 },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        },
+        {
+          "id": "control_hub_heap",
+          "type": "line",
+          "title": "JVM heap usage",
+          "description": "Heap memory currently used by the Control Hub JVM.",
+          "config": {
+            "show_legends": true,
+            "legends_position": "bottom",
+            "unit": "bytes",
+            "unit_custom": "",
+            "decimals": 2,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "sum(jvm_memory_used_bytes{namespace=\"control-hub\",area=\"heap\"})",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "jvm_memory_used_bytes",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": { "filterType": "group", "logicalOperator": "AND", "conditions": [] },
+                "promql_operations": []
+              },
+              "config": { "promql_legend": "heap used", "query_label": "" }
+            }
+          ],
+          "layout": { "x": 0, "y": 42, "w": 48, "h": 14, "i": 7 },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        },
+        {
+          "id": "control_hub_cpu",
+          "type": "line",
+          "title": "Process CPU usage",
+          "description": "CPU utilization reported by the Control Hub process.",
+          "config": {
+            "show_legends": false,
+            "legends_position": null,
+            "unit": "percent-1",
+            "unit_custom": "",
+            "decimals": 2,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "avg(process_cpu_usage{namespace=\"control-hub\"})",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "process_cpu_usage",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": { "filterType": "group", "logicalOperator": "AND", "conditions": [] },
+                "promql_operations": []
+              },
+              "config": { "promql_legend": "CPU", "query_label": "" }
+            }
+          ],
+          "layout": { "x": 48, "y": 42, "w": 48, "h": 14, "i": 8 },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        }
+      ]
+    }
+  ],
+  "variables": {
+    "list": [],
+    "showDynamicFilters": true
+  },
+  "defaultDatetimeDuration": {
+    "type": "relative",
+    "relativeTimePeriod": "1h"
+  }
+}
