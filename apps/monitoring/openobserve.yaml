@@ -1,0 +1,65 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: openobserve
+  namespace: argocd
+spec:
+  project: default
+  source:
+    chart: openobserve-standalone
+    repoURL: https://charts.openobserve.ai
+    targetRevision: 0.92.0
+    helm:
+      valuesObject:
+        auth:
+          existingRootUserSecret:
+            name: openobserve-root
+            emailKey: ZO_ROOT_USER_EMAIL
+            passwordKey: ZO_ROOT_USER_PASSWORD
+        persistence:
+          enabled: true
+          size: 20Gi
+        config:
+          ZO_CLUSTER_NAME: golias
+          ZO_TELEMETRY: "false"
+          ZO_USAGE_REPORTING_ENABLED: "false"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            memory: 1Gi
+        serviceMonitor:
+          enabled: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: openobserve-tailscale-ingress
+  namespace: monitoring
+  annotations:
+    tailscale.com/hostname: openobserve
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - openobserve
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: openobserve-openobserve-standalone
+                port:
+                  number: 5080

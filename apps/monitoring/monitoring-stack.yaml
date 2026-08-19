@@ -16,6 +16,17 @@ spec:
           prometheusSpec:
             # Alloy writes metrics received over OTLP to this endpoint.
             enableRemoteWriteReceiver: true
+            remoteWrite:
+              - url: http://openobserve-openobserve-standalone:5080/api/default/prometheus/api/v1/write
+                basicAuth:
+                  username:
+                    name: openobserve-root
+                    key: ZO_ROOT_USER_EMAIL
+                  password:
+                    name: openobserve-root
+                    key: ZO_ROOT_USER_PASSWORD
+                queueConfig:
+                  maxSamplesPerSend: 10000
             retention: 3d
             scrapeInterval: 60s
             evaluationInterval: 60s
@@ -249,6 +260,17 @@ spec:
           tolerations:
             - operator: Exists
         alloy:
+          extraEnv:
+            - name: OPENOBSERVE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: openobserve-root
+                  key: ZO_ROOT_USER_EMAIL
+            - name: OPENOBSERVE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: openobserve-root
+                  key: ZO_ROOT_USER_PASSWORD
           mounts:
             varlog: true
           extraPorts:
@@ -351,12 +373,22 @@ spec:
                 stage.label_drop {
                   values = ["container_runtime"]
                 }
-                forward_to = [loki.write.local.receiver]
+                forward_to = [loki.write.local.receiver, loki.write.openobserve.receiver]
               }
 
               loki.write "local" {
                 endpoint {
                   url = "http://loki-stack:3100/loki/api/v1/push"
+                }
+              }
+
+              loki.write "openobserve" {
+                endpoint {
+                  url = "http://openobserve-openobserve-standalone:5080/api/default/loki/api/v1/push"
+                  basic_auth {
+                    username = sys.env("OPENOBSERVE_USER")
+                    password = sys.env("OPENOBSERVE_PASSWORD")
+                  }
                 }
               }
 
@@ -377,9 +409,9 @@ spec:
 
               otelcol.processor.batch "apps" {
                 output {
-                  logs    = [otelcol.exporter.loki.apps.input]
-                  metrics = [otelcol.exporter.prometheus.apps.input]
-                  traces  = [otelcol.exporter.otlp.tempo.input]
+                  logs    = [otelcol.exporter.loki.apps.input, otelcol.exporter.otlp.openobserve.input]
+                  metrics = [otelcol.exporter.prometheus.apps.input, otelcol.exporter.otlp.openobserve.input]
+                  traces  = [otelcol.exporter.otlp.tempo.input, otelcol.exporter.otlp.openobserve.input]
                 }
               }
 
@@ -411,6 +443,27 @@ spec:
                   tls {
                     insecure = true
                   }
+                }
+              }
+
+              otelcol.exporter.otlp "openobserve" {
+                client {
+                  endpoint = "openobserve-openobserve-standalone:5081"
+                  auth     = otelcol.auth.basic.openobserve.handler
+                  headers = {
+                    "organization" = "default",
+                    "stream-name"  = "default",
+                  }
+                  tls {
+                    insecure = true
+                  }
+                }
+              }
+
+              otelcol.auth.basic "openobserve" {
+                client_auth {
+                  username = sys.env("OPENOBSERVE_USER")
+                  password = sys.env("OPENOBSERVE_PASSWORD")
                 }
               }
         serviceMonitor:

@@ -1,8 +1,8 @@
 # Observability stack
 
 The monitoring namespace provides Prometheus and Grafana for metrics, Loki for
-logs, Tempo for traces, and Grafana Alloy as the node log collector and OTLP
-gateway.
+logs, Tempo for traces, OpenObserve as an additional unified observability
+backend, and Grafana Alloy as the node log collector and OTLP gateway.
 
 ## Instrumenting applications with OpenTelemetry
 
@@ -27,7 +27,15 @@ env:
     value: deployment.environment=homelab,service.namespace=my-namespace
 ```
 
-Alloy sends traces to Tempo, metrics to Prometheus, and OTLP logs to Loki.
-Application stdout/stderr is also collected automatically and sent to Loki. For
-log-to-trace links in Grafana, include a 32-character trace ID in log messages
-using a field such as `trace_id`.
+Alloy sends traces to Tempo, metrics to Prometheus, and OTLP logs to Loki while
+also duplicating all three signals to OpenObserve. Prometheus remote-writes its
+scraped Kubernetes and application metrics to OpenObserve. Application
+stdout/stderr is collected automatically and sent to both Loki and OpenObserve.
+For log-to-trace links, include a 32-character trace ID in log messages using a
+field such as `trace_id`.
+
+OpenObserve is exposed through the Tailscale ingress named `openobserve`. Its
+root credentials come from the Vault secret `openobserve`, which must contain:
+
+- `root-email`: the root user's email address
+- `root-password`: the root user's password
