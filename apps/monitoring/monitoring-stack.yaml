@@ -38,7 +38,7 @@ spec:
           # Required for installations upgraded from Grafana versions that did
           # not bundle the Logs Drilldown app.
           plugins:
-            - grafana-lokiexplore-app
+            - https://storage.googleapis.com/integration-artifacts/grafana-lokiexplore-app/release/main/any/grafana-lokiexplore-app-main.zip;grafana-lokiexplore-app
           resources:
             requests:
               memory: 100Mi
