@@ -461,10 +461,8 @@ spec:
               }
 
               otelcol.auth.basic "openobserve" {
-                client_auth {
-                  username = sys.env("OPENOBSERVE_USER")
-                  password = sys.env("OPENOBSERVE_PASSWORD")
-                }
+                username = sys.env("OPENOBSERVE_USER")
+                password = sys.env("OPENOBSERVE_PASSWORD")
               }
         serviceMonitor:
           enabled: true
