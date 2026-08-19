@@ -153,6 +153,10 @@ spec:
       valuesObject:
         loki:
           enabled: true
+          # loki-stack 2.10.2 defaults to Loki 2.6.1, whose LogQL parser does
+          # not support the vector() query used by current Grafana health checks.
+          image:
+            tag: 2.9.8
           persistence:
             enabled: true
             size: 10Gi
