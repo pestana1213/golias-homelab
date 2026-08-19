@@ -14,6 +14,8 @@ spec:
       valuesObject:
         prometheus:
           prometheusSpec:
+            # Alloy writes metrics received over OTLP to this endpoint.
+            enableRemoteWriteReceiver: true
             retention: 3d
             scrapeInterval: 60s
             evaluationInterval: 60s
@@ -54,12 +56,29 @@ spec:
               url: http://loki-stack:3100
               access: proxy
               isDefault: false
+              jsonData:
+                derivedFields:
+                  - name: TraceID
+                    matcherRegex: 'trace[_-]?id[=:]?[ "'']*([0-9a-fA-F]{32})'
+                    datasourceUid: tempo
+                    url: '$${__value.raw}'
             - name: Tempo
               type: tempo
               uid: tempo
               url: http://tempo:3100
               access: proxy
               isDefault: false
+              jsonData:
+                nodeGraph:
+                  enabled: true
+                serviceMap:
+                  datasourceUid: prometheus
+                tracesToLogsV2:
+                  datasourceUid: loki
+                  spanStartTimeShift: -1m
+                  spanEndTimeShift: 1m
+                  filterByTraceID: true
+                  filterBySpanID: false
           dashboardProviders:
             dashboardproviders.yaml:
               apiVersion: 1
@@ -138,10 +157,8 @@ spec:
             enabled: true
             size: 10Gi
         promtail:
-          enabled: true
-          config:
-            clients:
-              - url: http://loki-stack:3100/loki/api/v1/push
+          # Log collection is handled by Grafana Alloy below.
+          enabled: false
         grafana:
           enabled: false
   destination:
@@ -188,6 +205,178 @@ spec:
         persistence:
           enabled: true
           size: 10Gi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: alloy
+  namespace: argocd
+spec:
+  project: default
+  source:
+    chart: alloy
+    repoURL: https://grafana.github.io/helm-charts
+    targetRevision: 1.11.0
+    helm:
+      valuesObject:
+        controller:
+          type: daemonset
+          tolerations:
+            - operator: Exists
+        alloy:
+          mounts:
+            varlog: true
+          extraPorts:
+            - name: otlp-grpc
+              port: 4317
+              targetPort: 4317
+              protocol: TCP
+              appProtocol: grpc
+            - name: otlp-http
+              port: 4318
+              targetPort: 4318
+              protocol: TCP
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 256Mi
+          configMap:
+            content: |-
+              // Collect every pod's stdout/stderr logs from the local node.
+              discovery.kubernetes "pods" {
+                role = "pod"
+                selectors {
+                  role  = "pod"
+                  field = "spec.nodeName=" + sys.env("K8S_NODE_NAME")
+                }
+              }
+
+              discovery.relabel "pod_logs" {
+                targets = discovery.kubernetes.pods.targets
+
+                rule {
+                  source_labels = ["__meta_kubernetes_namespace"]
+                  target_label  = "namespace"
+                }
+                rule {
+                  source_labels = ["__meta_kubernetes_pod_name"]
+                  target_label  = "pod"
+                }
+                rule {
+                  source_labels = ["__meta_kubernetes_pod_container_name"]
+                  target_label  = "container"
+                }
+                rule {
+                  source_labels = ["__meta_kubernetes_namespace", "__meta_kubernetes_pod_name"]
+                  separator     = "/"
+                  target_label  = "job"
+                }
+                rule {
+                  source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
+                  separator     = "/"
+                  replacement   = "/var/log/pods/*$1/*.log"
+                  target_label  = "__path__"
+                }
+                rule {
+                  source_labels = ["__meta_kubernetes_pod_container_id"]
+                  regex         = "^(\\w+):\\/\\/.+$"
+                  replacement   = "$1"
+                  target_label  = "container_runtime"
+                }
+              }
+
+              local.file_match "pod_logs" {
+                path_targets = discovery.relabel.pod_logs.output
+              }
+
+              loki.source.file "pod_logs" {
+                targets    = local.file_match.pod_logs.targets
+                forward_to = [loki.process.pod_logs.receiver]
+              }
+
+              loki.process "pod_logs" {
+                stage.match {
+                  selector = "{container_runtime=~\"containerd|cri-o\"}"
+                  stage.cri {}
+                }
+                stage.label_drop {
+                  values = ["container_runtime"]
+                }
+                forward_to = [loki.write.local.receiver]
+              }
+
+              loki.write "local" {
+                endpoint {
+                  url = "http://loki-stack:3100/loki/api/v1/push"
+                }
+              }
+
+              // OTLP endpoint used by instrumented applications.
+              otelcol.receiver.otlp "apps" {
+                grpc {
+                  endpoint = "0.0.0.0:4317"
+                }
+                http {
+                  endpoint = "0.0.0.0:4318"
+                }
+                output {
+                  logs    = [otelcol.processor.batch.apps.input]
+                  metrics = [otelcol.processor.batch.apps.input]
+                  traces  = [otelcol.processor.batch.apps.input, otelcol.connector.servicegraph.apps.input]
+                }
+              }
+
+              otelcol.processor.batch "apps" {
+                output {
+                  logs    = [otelcol.exporter.loki.apps.input]
+                  metrics = [otelcol.exporter.prometheus.apps.input]
+                  traces  = [otelcol.exporter.otlp.tempo.input]
+                }
+              }
+
+              // Derive service dependency metrics used by Grafana's Service Map.
+              otelcol.connector.servicegraph "apps" {
+                dimensions = ["deployment.environment"]
+                output {
+                  metrics = [otelcol.exporter.prometheus.apps.input]
+                }
+              }
+
+              otelcol.exporter.loki "apps" {
+                forward_to = [loki.write.local.receiver]
+              }
+
+              otelcol.exporter.prometheus "apps" {
+                forward_to = [prometheus.remote_write.local.receiver]
+              }
+
+              prometheus.remote_write "local" {
+                endpoint {
+                  url = "http://kube-prometheus-stack-prometheus:9090/api/v1/write"
+                }
+              }
+
+              otelcol.exporter.otlp "tempo" {
+                client {
+                  endpoint = "tempo:4317"
+                  tls {
+                    insecure = true
+                  }
+                }
+              }
+        serviceMonitor:
+          enabled: true
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring

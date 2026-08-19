@@ -25,42 +25,6 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: grafana-ingress-v2
-  namespace: monitoring
-spec:
-  rules:
-    - host: grafana.golias.home
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: kube-prometheus-stack-grafana
-                port:
-                  number: 80
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: prometheus-ingress-v2
-  namespace: monitoring
-spec:
-  rules:
-    - host: prometheus.golias.home
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: kube-prometheus-stack-prometheus
-                port:
-                  number: 9090
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
   name: prometheus-tailscale-ingress
   namespace: monitoring
   annotations:
