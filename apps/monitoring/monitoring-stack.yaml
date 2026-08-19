@@ -166,6 +166,9 @@ spec:
           # not support the vector() query used by current Grafana health checks.
           image:
             tag: 2.9.8
+          config:
+            limits_config:
+              volume_enabled: true
           persistence:
             enabled: true
             size: 10Gi
