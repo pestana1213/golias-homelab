@@ -35,6 +35,11 @@ spec:
             podMonitorSelectorNilUsesHelmValues: false
         grafana:
           enabled: true
+          # Logs Drilldown releases require Grafana 11.6.11 or newer. The
+          # kube-prometheus-stack 70.4.0 default (11.6.0) cannot resolve the
+          # plugin's React runtime and returns "App not found".
+          image:
+            tag: 11.6.11
           # Required for installations upgraded from Grafana versions that did
           # not bundle the Logs Drilldown app.
           plugins:
