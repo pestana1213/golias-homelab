@@ -3,9 +3,13 @@ kind: Service
 metadata:
   name: control-hub
   namespace: control-hub
+  labels:
+    app.kubernetes.io/name: control-hub
+    app.kubernetes.io/instance: control-hub
 spec:
   selector:
-    app: control-hub
+    app.kubernetes.io/name: control-hub
+    app.kubernetes.io/instance: control-hub
   ports:
     - name: http
       port: 8080
