@@ -35,6 +35,10 @@ spec:
             podMonitorSelectorNilUsesHelmValues: false
         grafana:
           enabled: true
+          # Required for installations upgraded from Grafana versions that did
+          # not bundle the Logs Drilldown app.
+          plugins:
+            - grafana-lokiexplore-app
           resources:
             requests:
               memory: 100Mi
