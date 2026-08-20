@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: golias-web
+  namespace: control-hub
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - golias
+  rules:
+    - host: golias
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: golias-web
+                port:
+                  number: 3000
