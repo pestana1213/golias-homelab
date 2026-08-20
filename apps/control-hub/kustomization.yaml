@@ -9,6 +9,11 @@ resources:
   - postgres-service.yaml
   - pvc.yaml
   - external-db-secret.yaml
+  - web-deployment.yaml
+  - web-service.yaml
+  - web-ingress.yaml
 images:
   - name: ghcr.io/pestana1213/control-hub
     newTag: cfc49f4b4c674eb253c08aa51667484d6dc7efaa
+  - name: ghcr.io/pestana1213/golias-web
+    newTag: latest
