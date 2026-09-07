@@ -14,6 +14,6 @@ resources:
   - web-ingress.yaml
 images:
   - name: ghcr.io/pestana1213/control-hub
-    newTag: d66cc1eae38c1083f819e3c8dc67d8bd5e7a3cd8
+    newTag: 72c015acf9d15a88613dbf8e2f3c2a1fe1a0c1c6
   - name: ghcr.io/pestana1213/golias-web
     newTag: latest
