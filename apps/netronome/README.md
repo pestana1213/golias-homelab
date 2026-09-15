@@ -27,7 +27,7 @@ Then open <http://localhost:7575>.
 
 - Configuration and the default SQLite database persist under `/data` on `netronome-data`. Back up this volume; deleting the PVC may delete its data.
 - One replica and the Recreate strategy prevent overlapping instances during upgrades.
-- The image runs as its bundled non-root user. The volume uses supplemental group 1000 for write access.
+- A root init container sets `/data` ownership to the image's bundled `netronome` user and group, including existing files. The application runs as that non-root user. Ownership is required because Netronome calls `chmod` on its database directory; supplemental group write access alone is insufficient. The storage backend must support `chown` (root-squashed NFS requires ownership provisioning on the storage server).
 - `NET_RAW` enables raw sockets for network diagnostics. No host networking is enabled: tests measure connectivity from the pod, including the cluster network path. Host interface bandwidth monitoring requires a separately configured agent and vnstat.
 - CPU is requested but not capped, to avoid throttling speed tests. Memory is capped at 512Mi.
 - The image follows the upstream `latest` tag. To update, run `kubectl rollout restart deployment/netronome -n netronome`.
