@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: netronome-ingress
+  namespace: netronome
+  annotations:
+    tailscale.com/hostname: netronome
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - netronome
+  rules:
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: netronome
+                port:
+                  number: 80

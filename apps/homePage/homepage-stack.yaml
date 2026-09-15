@@ -42,6 +42,12 @@ data:
   
   services.yaml: |
     - Monitoring:
+        - Netronome:
+            icon: mdi-speedometer
+            href: https://netronome
+            description: Network speed tests and monitoring
+            siteMonitor: http://netronome.netronome.svc.cluster.local
+
         - Grafana:
             icon: grafana.png
             href: http://grafana.golias.home

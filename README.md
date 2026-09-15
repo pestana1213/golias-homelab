@@ -13,6 +13,7 @@ apps/
   vaultwarden/          # Password manager
   adguard/              # DNS ad blocker
   monitoring/           # Grafana + Prometheus stack
+  netronome/            # Network speed testing and monitoring (see app README)
   homePage/             # Homepage dashboard
   vault/                # HashiCorp Vault — central secret store
   external-secrets/     # External Secrets Operator — syncs Vault secrets to Kubernetes
