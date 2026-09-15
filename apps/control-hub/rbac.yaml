@@ -17,6 +17,7 @@ rules:
       - get
       - list
       - watch
+      - patch
   - apiGroups:
       - ""
     resources:
@@ -27,7 +28,6 @@ rules:
       - get
       - list
       - watch
-      - patch
   - apiGroups:
       - networking.k8s.io
     resources:
