@@ -1,8 +1,0 @@
-resources:
-  - deployment.yaml
-  - service.yaml
-  - ingress.yaml
-
-images:
-  - name: ghcr.io/pestana1213/f1-app
-    newTag: ddea82a730dca9751ee059b4a1dbd418e7752725
