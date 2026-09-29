@@ -17,6 +17,8 @@ apps/
   homePage/             # Homepage dashboard
   vault/                # HashiCorp Vault — central secret store
   external-secrets/     # External Secrets Operator — syncs Vault secrets to Kubernetes
+  control-hub/          # Control plane for homelab applications
+  wealth-service/       # Personal wealth tracking service
   ...
 ```
 

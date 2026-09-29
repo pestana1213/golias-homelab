@@ -1,0 +1,15 @@
+resources:
+  - namespace.yaml
+  - external-secret.yaml
+  - external-db-secret.yaml
+  - pvc.yaml
+  - postgres.yaml
+  - postgres-service.yaml
+  - deployment.yaml
+  - service.yaml
+  - servicemonitor.yaml
+  - ingress.yaml
+
+images:
+  - name: ghcr.io/pestana1213/wealth-service
+    newTag: latest

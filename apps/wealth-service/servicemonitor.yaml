@@ -1,0 +1,13 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: wealth-service
+  namespace: wealth-service
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: wealth-service
+  endpoints:
+    - port: http
+      path: /actuator/prometheus
+      interval: 30s

@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wealth-service
+  namespace: wealth-service
+  labels:
+    app.kubernetes.io/name: wealth-service
+    app.kubernetes.io/instance: wealth-service
+    app.kubernetes.io/component: backend
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: wealth-service
+      app.kubernetes.io/instance: wealth-service
+
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: wealth-service
+        app.kubernetes.io/instance: wealth-service
+        app.kubernetes.io/component: backend
+
+    spec:
+      imagePullSecrets:
+        - name: ghcr
+
+      containers:
+        - name: wealth-service
+          image: ghcr.io/pestana1213/wealth-service
+
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://wealth-service-postgres:5432/wealth
+
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: wealth-service-db
+                  key: username
+
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: wealth-service-db
+                  key: password
+
+            - name: OTEL_SERVICE_NAME
+              value: wealth-service
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://alloy.monitoring.svc.cluster.local:4318
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: http/protobuf
+            - name: OTEL_TRACES_EXPORTER
+              value: otlp
+            - name: OTEL_METRICS_EXPORTER
+              value: otlp
+            - name: OTEL_LOGS_EXPORTER
+              value: otlp
+            - name: OTEL_TRACES_SAMPLER
+              value: parentbased_traceidratio
+            - name: OTEL_TRACES_SAMPLER_ARG
+              value: "0.25"
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: deployment.environment=homelab,service.namespace=wealth-service
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 30
+
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
