@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: wealth-frontend
+  namespace: wealth-service
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - wealth
+  rules:
+    - host: wealth
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: wealth-frontend
+                port:
+                  name: http

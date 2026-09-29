@@ -9,7 +9,12 @@ resources:
   - service.yaml
   - servicemonitor.yaml
   - ingress.yaml
+  - web-deployment.yaml
+  - web-service.yaml
+  - web-ingress.yaml
 
 images:
   - name: ghcr.io/pestana1213/wealth-service
     newTag: 90deafc6cc2bb03b1d295188995734ca8d73f92f
+  - name: ghcr.io/pestana1213/wealth-frontend
+    newTag: latest

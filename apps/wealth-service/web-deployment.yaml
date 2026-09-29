@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wealth-frontend
+  namespace: wealth-service
+  labels:
+    app.kubernetes.io/name: wealth-frontend
+    app.kubernetes.io/instance: wealth-frontend
+    app.kubernetes.io/component: frontend
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: wealth-frontend
+      app.kubernetes.io/instance: wealth-frontend
+
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: wealth-frontend
+        app.kubernetes.io/instance: wealth-frontend
+        app.kubernetes.io/component: frontend
+
+    spec:
+      imagePullSecrets:
+        - name: ghcr
+
+      containers:
+        - name: wealth-frontend
+          image: ghcr.io/pestana1213/wealth-frontend
+
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+
+          env:
+            - name: WEALTH_API_URL
+              value: http://wealth-service.wealth-service.svc.cluster.local:8080
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 100m
+
+            limits:
+              memory: 256Mi
+              cpu: 500m
