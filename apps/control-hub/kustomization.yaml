@@ -16,4 +16,4 @@ images:
   - name: ghcr.io/pestana1213/control-hub
     newTag: b256ceb13646605699ddc9666c9b1436e0d8a7d3
   - name: ghcr.io/pestana1213/golias-web
-    newTag: 2ef3151702dad356ff4370094e430193aafc862a
+    newTag: 1bad86db8cd036c36ccd2d2e4ec3ab980bbec64e
