@@ -70,6 +70,20 @@ spec:
                 secretKeyRef:
                   name: control-hub-db
                   key: password
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 30
+
           resources:
             requests:
               memory: "256Mi"
