@@ -3,6 +3,9 @@ kind: Ingress
 metadata:
   name: control-hub
   namespace: control-hub
+  labels:
+    app.kubernetes.io/name: control-hub
+    app.kubernetes.io/instance: control-hub
 spec:
   ingressClassName: tailscale
   tls:

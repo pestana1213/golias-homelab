@@ -3,6 +3,9 @@ kind: Ingress
 metadata:
   name: wealth-frontend
   namespace: wealth-service
+  labels:
+    app.kubernetes.io/name: wealth-frontend
+    app.kubernetes.io/instance: wealth-frontend
 spec:
   ingressClassName: tailscale
   tls:

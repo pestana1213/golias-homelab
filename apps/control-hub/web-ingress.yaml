@@ -3,6 +3,9 @@ kind: Ingress
 metadata:
   name: golias-web
   namespace: control-hub
+  labels:
+    app.kubernetes.io/name: golias-web
+    app.kubernetes.io/instance: golias-web
 spec:
   ingressClassName: tailscale
   tls:
