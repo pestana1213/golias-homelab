@@ -42,6 +42,14 @@ spec:
               protocol: TCP
 
           env:
+            # Distinguishes every metric this pod emits from production.
+            # application.properties sets management.metrics.tags.application
+            # from this name, so it lands as a label on all series. Without it
+            # both deployments report application="wealth-service" and the
+            # OpenObserve dashboards cannot tell a load run from real traffic.
+            - name: SPRING_APPLICATION_NAME
+              value: wealth-service-loadtest
+
             # Separate database on the shared PostgreSQL instance. Liquibase
             # runs on boot and creates the schema, so an empty database is
             # all that is needed.

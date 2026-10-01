@@ -1,18 +1,11 @@
-# NOT part of the default deployment.
+# Scraped alongside production. The OpenObserve dashboard filters on the
+# `application` label (SPRING_APPLICATION_NAME on the Deployment), so load-test
+# series are separable from real traffic rather than merged into it.
 #
-# This file is deliberately excluded from kustomization.yaml. The cluster
-# Prometheus sets `serviceMonitorSelectorNilUsesHelmValues: false` without an
-# explicit `serviceMonitorSelector`, which renders an empty selector and
-# therefore selects every ServiceMonitor in the cluster, regardless of labels.
-# Applying this would remote-write load-test series into the same OpenObserve
-# and Grafana dashboards as production.
-#
-# To scrape the load-test API anyway, apply it by hand:
-#
-#   kubectl apply -f apps/wealth-loadtest/servicemonitor.yaml
-#
-# Remember to delete it afterwards, and to expect its series in the shared
-# dashboards until you do.
+# The cluster Prometheus has an empty ServiceMonitor selector, so this is picked
+# up automatically. That also means its series are remote-written to
+# OpenObserve, sharing storage and the 3-day retention with production. Select
+# the "Load test" environment on the dashboard to isolate them.
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:

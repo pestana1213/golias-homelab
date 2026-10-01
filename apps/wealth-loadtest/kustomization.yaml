@@ -5,9 +5,9 @@ resources:
   - deployment.yaml
   - service.yaml
   - scripts-configmap.yaml
-  # servicemonitor.yaml is intentionally omitted. The cluster Prometheus has an
-  # empty ServiceMonitor selector, so applying it would remote-write load-test
-  # series into the production dashboards. See the file header.
+  # Scraped so a load run is visible in OpenObserve alongside production. The
+  # dashboard filters on the `application` label, so the series stay separable.
+  - servicemonitor.yaml
   - k6-cronjob.yaml
 
 images:
