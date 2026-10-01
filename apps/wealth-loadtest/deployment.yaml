@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wealth-service-loadtest
+  namespace: wealth-loadtest
+  labels:
+    app.kubernetes.io/name: wealth-service-loadtest
+    app.kubernetes.io/part-of: wealth-service
+    app.kubernetes.io/component: backend
+
+spec:
+  replicas: 1
+
+  # One replica bound to the shared PostgreSQL instance; a rolling update would
+  # briefly run two instances against the same database.
+  strategy:
+    type: Recreate
+
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: wealth-service-loadtest
+
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: wealth-service-loadtest
+        app.kubernetes.io/part-of: wealth-service
+        app.kubernetes.io/component: backend
+
+    spec:
+      imagePullSecrets:
+        - name: ghcr
+
+      containers:
+        - name: wealth-service
+          # Replaced by the GitHub Actions tag bump, same image as production.
+          image: ghcr.io/pestana1213/wealth-service
+
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+
+          env:
+            # Separate database on the shared PostgreSQL instance. Liquibase
+            # runs on boot and creates the schema, so an empty database is
+            # all that is needed.
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://wealth-service-postgres.wealth-service.svc.cluster.local:5432/wealth_loadtest
+
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: wealth-loadtest-db
+                  key: username
+
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: wealth-loadtest-db
+                  key: password
+
+            # The default HikariCP pool is 10 connections. Left at the default
+            # so the run measures the same pool size as production; raise it
+            # only to see whether the pool, not the database, is the ceiling.
+            - name: SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE
+              value: "10"
+
+            # No OTEL exporter: load-test traces would otherwise be forwarded to
+            # the shared Alloy pipeline and show up in OpenObserve next to real
+            # traffic. Prometheus is scraped instead, see servicemonitor.yaml.
+            - name: OTEL_SDK_DISABLED
+              value: "true"
+
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 5
+
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 30
+
+          # Production runs 250m/500m CPU and 256Mi/512Mi memory. The load test
+          # is deliberately given more headroom: the goal is to find the
+          # ceiling of the application and database, not of the CPU limit.
+          # Keep this in mind when comparing against the production pod.
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "2000m"
+
+      # Let a finished load-test pod go away so it does not sit on the node.
+      # Comment out to keep the log of the last run around.
+      # activeDeadlineSeconds: 3600

@@ -1,0 +1,64 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: wealth-loadtest-create-database
+  namespace: wealth-loadtest
+
+spec:
+  backoffLimit: 4
+  ttlSecondsAfterFinished: 3600
+
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: wealth-loadtest-create-database
+        app.kubernetes.io/component: loadtest
+
+    spec:
+      restartPolicy: OnFailure
+
+      containers:
+        - name: createdb
+          image: postgres:17
+
+          env:
+            - name: PGHOST
+              value: wealth-service-postgres.wealth-service.svc.cluster.local
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  name: wealth-loadtest-db
+                  key: username
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: wealth-loadtest-db
+                  key: password
+            - name: LOADTEST_DB
+              value: wealth_loadtest
+
+          command:
+            - sh
+            - -c
+            - |
+              set -eu
+              until pg_isready -q; do
+                echo "waiting for PostgreSQL..."
+                sleep 2
+              done
+
+              if psql -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname='${LOADTEST_DB}'" | grep -q 1; then
+                echo "database ${LOADTEST_DB} already exists"
+                exit 0
+              fi
+
+              createdb "${LOADTEST_DB}"
+              echo "created database ${LOADTEST_DB}"
+
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi

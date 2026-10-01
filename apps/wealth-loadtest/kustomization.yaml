@@ -1,0 +1,14 @@
+resources:
+  - namespace.yaml
+  - external-db-secret.yaml
+  - create-database-job.yaml
+  - deployment.yaml
+  - service.yaml
+  # servicemonitor.yaml is intentionally omitted. The cluster Prometheus has an
+  # empty ServiceMonitor selector, so applying it would remote-write load-test
+  # series into the production dashboards. See the file header.
+  - k6-cronjob.yaml
+
+images:
+  - name: ghcr.io/pestana1213/wealth-service
+    newTag: 90deafc6cc2bb03b1d295188995734ca8d73f92f

@@ -1,0 +1,33 @@
+# NOT part of the default deployment.
+#
+# This file is deliberately excluded from kustomization.yaml. The cluster
+# Prometheus sets `serviceMonitorSelectorNilUsesHelmValues: false` without an
+# explicit `serviceMonitorSelector`, which renders an empty selector and
+# therefore selects every ServiceMonitor in the cluster, regardless of labels.
+# Applying this would remote-write load-test series into the same OpenObserve
+# and Grafana dashboards as production.
+#
+# To scrape the load-test API anyway, apply it by hand:
+#
+#   kubectl apply -f apps/wealth-loadtest/servicemonitor.yaml
+#
+# Remember to delete it afterwards, and to expect its series in the shared
+# dashboards until you do.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: wealth-service-loadtest
+  namespace: wealth-loadtest
+  labels:
+    app.kubernetes.io/part-of: wealth-service
+    app.kubernetes.io/component: loadtest
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: wealth-service-loadtest
+  endpoints:
+    - port: http
+      path: /actuator/prometheus
+      # Match the cluster-wide 60s scrape interval rather than hammering the
+      # pod at 15s for a test workload.
+      interval: 60s

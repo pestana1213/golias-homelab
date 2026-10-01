@@ -1,0 +1,149 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: wealth-loadtest-k6
+  namespace: wealth-loadtest
+
+spec:
+  # Suspended by default: the load test runs when you ask for it, not on a
+  # timer. Clear the suspend field to run a single Job.
+  suspend: true
+
+  schedule: "0 0 1 1 *"
+
+  # One Job per trigger, never overlapping.
+  concurrencyPolicy: Forbid
+
+  startingDeadlineSeconds: 300
+
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 2
+
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      # Keep finished pods briefly so `kubectl logs` works, then clean up.
+      ttlSecondsAfterFinished: 900
+
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: wealth-loadtest-k6
+            app.kubernetes.io/part-of: wealth-service
+            app.kubernetes.io/component: loadtest
+
+        spec:
+          # k6 must not be restarted on failure: a restarted run would
+          # re-create users and re-drive the database.
+          restartPolicy: Never
+
+          # The k6 image ships wget but no curl.
+          initContainers:
+            - name: wait-for-api
+              image: grafana/k6:2.3.0
+              command:
+                - sh
+                - -c
+                - |
+                  set -eu
+                  until wget -q -O- http://wealth-service-loadtest:8080/actuator/health >/dev/null 2>&1; do
+                    echo "waiting for wealth-service-loadtest..."
+                    sleep 2
+                  done
+                  echo "api is up"
+
+              resources:
+                requests:
+                  cpu: 10m
+                  memory: 32Mi
+                limits:
+                  cpu: 100m
+                  memory: 64Mi
+
+          containers:
+            - name: k6
+              # Pinned rather than :latest so a run is reproducible.
+              image: grafana/k6:2.3.0
+
+              # Match the image's own user so the ConfigMap mount is readable.
+              securityContext:
+                runAsUser: 12345
+                runAsNonRoot: true
+
+              command:
+                - k6
+                - run
+                - --quiet
+                - /scripts/wealth-service.js
+
+              env:
+                # In-cluster address of the load-test Deployment. The port is
+                # the Service port rather than the container port on purpose:
+                # the port round trip is part of what is being measured.
+                - name: BASE_URL
+                  value: http://wealth-service-loadtest:8080
+
+                # Test data shape. See load-tests/README.md in the
+                # wealth-service repository for the full list of knobs.
+                - name: NUM_USERS
+                  value: "200"
+                - name: ACCOUNTS_PER_USER
+                  value: "2"
+                - name: BUCKETS_PER_USER
+                  value: "3"
+                - name: INITIAL_BALANCE
+                  value: "10000000"
+
+                # Open model: fixed arrival rate, so throughput is independent
+                # of latency and the run shows where the service saturates.
+                - name: EXECUTOR
+                  value: arrival
+                - name: RAMP_STAGES
+                  value: 25:30s,100:1m,200:1m,0:15s
+                - name: READ_RATE
+                  value: "20"
+                - name: MAX_VUS
+                  value: "300"
+                - name: PRE_ALLOCATED_VUS
+                  value: "50"
+
+                # Every VU writes to user #1's accounts and buckets, which
+                # maximises FOR UPDATE NOWAIT contention and shows how the 409
+                # path behaves. Set to false for a many-users,
+                # low-contention run.
+                - name: SHARED_USER
+                  value: "true"
+
+              volumeMounts:
+                - name: scripts
+                  mountPath: /scripts
+                  readOnly: true
+
+              resources:
+                requests:
+                  cpu: 250m
+                  memory: 256Mi
+                limits:
+                  # k6 is the load generator: a tight limit here throttles the
+                  # test rather than the service under test.
+                  cpu: "2000m"
+                  memory: 1Gi
+
+          volumes:
+            - name: scripts
+              configMap:
+                # Generated from load-tests/ with --from-file, which flattens
+                # the directory layout. items puts the library files back under
+                # lib/ so the relative imports in wealth-service.js resolve.
+                name: wealth-loadtest-scripts
+                items:
+                  - key: wealth-service.js
+                    path: wealth-service.js
+                  - key: config.js
+                    path: lib/config.js
+                  - key: api.js
+                    path: lib/api.js
+                  - key: workload.js
+                    path: lib/workload.js
+                  - key: uuid.js
+                    path: lib/uuid.js
