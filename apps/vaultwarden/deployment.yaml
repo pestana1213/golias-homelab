@@ -3,6 +3,10 @@ kind: PersistentVolumeClaim
 metadata:
   name: vaultwarden-data-pvc
   namespace: vaultwarden
+  labels:
+    app.kubernetes.io/name: vaultwarden
+    app.kubernetes.io/component: security
+
 spec:
   accessModes:
     - ReadWriteOnce

@@ -3,6 +3,10 @@ kind: PersistentVolumeClaim
 metadata:
   name: immich-library-pvc
   namespace: immich
+  labels:
+    app.kubernetes.io/name: immich
+    app.kubernetes.io/component: photos
+
 spec:
   accessModes:
     - ReadWriteOnce
