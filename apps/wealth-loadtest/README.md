@@ -33,23 +33,25 @@ its own database instance.
 
 ## Prerequisites
 
-The `wealth-loadtest-scripts` ConfigMap holds the k6 scripts and is **not** in
-this directory, to avoid duplicating them from the `wealth-service` repository.
-Generate it from `~/Desktop/Projects/wealth-service/load-tests` before applying:
+None. `scripts-configmap.yaml` is committed in this directory, so
+`kubectl apply -k apps/wealth-loadtest/` is enough on its own.
+
+The k6 scripts themselves are owned by the `wealth-service` repository, not this
+one, so the ConfigMap is generated rather than hand-written. Regenerate it after
+changing anything under `wealth-service/load-tests`:
 
 ```bash
 cd ~/Desktop/Projects/wealth-service/load-tests
-kubectl create configmap wealth-loadtest-scripts \
-  --from-file=wealth-service.js=wealth-service.js \
-  --from-file=config.js=lib/config.js \
-  --from-file=api.js=lib/api.js \
-  --from-file=workload.js=lib/workload.js \
-  --from-file=uuid.js=lib/uuid.js \
-  -n wealth-loadtest --dry-run=client -o yaml | kubectl apply -f -
+./render-configmap.py > ~/Desktop/Projects/golias-homelab/apps/wealth-loadtest/scripts-configmap.yaml
 ```
 
-Regenerate it whenever the scripts change. `k6-cronjob.yaml` remaps the
-flattened ConfigMap keys back into `lib/` so the relative imports resolve.
+Only `python3` is required, no `kubectl` and no cluster access. CI regenerates
+and commits this file on every push to `wealth-service`, so it should never be
+stale; regenerate it by hand only when working offline.
+
+ConfigMap keys cannot contain `/`, so `lib/api.js` is stored under the key
+`api.js` and `k6-cronjob.yaml` remaps the keys back into `lib/` for the
+relative imports to resolve.
 
 ## Deploy
 
