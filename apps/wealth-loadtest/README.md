@@ -53,12 +53,27 @@ flattened ConfigMap keys back into `lib/` so the relative imports resolve.
 
 ## Deploy
 
+Order matters here. The app runs Liquibase against `wealth_loadtest`, so the
+create-database Job has to finish first, and the Job reads the credentials from
+a Secret that `ExternalSecret` has to create first.
+
 ```bash
 kubectl apply -k apps/wealth-loadtest/
-kubectl rollout status deployment/wealth-service-loadtest -n wealth-loadtest
+
+# Credentials, synced from Vault.
+kubectl wait --for=condition=Ready secret/wealth-loadtest-db \
+  -n wealth-loadtest --timeout=2m
+
+# Then the database itself.
 kubectl wait --for=condition=complete job/wealth-loadtest-create-database \
-  -n wealth-loadtest
+  -n wealth-loadtest --timeout=2m
+
+# Then the API, which migrates the schema on boot.
+kubectl rollout status deployment/wealth-service-loadtest \
+  -n wealth-loadtest --timeout=3m
 ```
+
+The create-database Job is idempotent, so re-applying is harmless.
 
 ## Run
 
@@ -135,11 +150,24 @@ kubectl exec -n wealth-loadtest deploy/wealth-service-loadtest -- \
 
 ```bash
 kubectl delete -k apps/wealth-loadtest/
-kubectl exec -n wealth-service deploy/wealth-service-postgres -- \
-  psql -U "$PGUSER" -d postgres -c 'DROP DATABASE IF EXISTS wealth_loadtest'
+
+kubectl exec -n wealth-service deploy/wealth-service-postgres -- sh -c '
+  psql -U "$POSTGRES_USER" -d postgres -v ON_ERROR_STOP=1 \
+    -c "SELECT pg_terminate_backend(pid) FROM pg_stat_activity \
+        WHERE datname = '\''wealth_loadtest'\'' AND pid <> pg_backend_pid()" \
+    -c "DROP DATABASE IF EXISTS wealth_loadtest"
+'
 ```
 
-The first command removes the namespace and everything in it. The second drops
-the load-test database, which survives because it lives on the production
-PostgreSQL pod rather than in the namespace. Set `PGUSER` to the username from
-the `wealth-service-db` Secret, and pass the password via `PGPASSWORD`.
+The first command removes the namespace and everything in it. The second is
+needed because the load-test database lives on the production PostgreSQL pod
+rather than in the namespace, so deleting the namespace does not remove it. It
+reads the credentials straight from the pod's environment, so there is nothing
+to substitute.
+
+If the drop reports active connections, scale the load-test API down first so it
+lets go of the pool:
+
+```bash
+kubectl scale deploy/wealth-service-loadtest -n wealth-loadtest --replicas=0
+```

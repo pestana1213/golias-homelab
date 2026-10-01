@@ -68,7 +68,8 @@ spec:
 
             # No OTEL exporter: load-test traces would otherwise be forwarded to
             # the shared Alloy pipeline and show up in OpenObserve next to real
-            # traffic. Prometheus is scraped instead, see servicemonitor.yaml.
+            # traffic. Counters are still exposed on /actuator/prometheus;
+            # servicemonitor.yaml is opt-in for that reason.
             - name: OTEL_SDK_DISABLED
               value: "true"
 
