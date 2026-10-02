@@ -10,7 +10,11 @@ metadata:
 
 spec:
   replicas: 1
-
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: control-hub
@@ -86,9 +90,8 @@ spec:
 
           resources:
             requests:
-              memory: "256Mi"
-              cpu: "250m"
+              memory: "512Mi"
+              cpu: "200m"
 
             limits:
-              memory: "512Mi"
-              cpu: "500m"
+              memory: "768Mi"

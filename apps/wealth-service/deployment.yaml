@@ -14,6 +14,12 @@ spec:
       app.kubernetes.io/name: wealth-service
       app.kubernetes.io/instance: wealth-service
 
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+
   template:
     metadata:
       labels:
@@ -99,8 +105,7 @@ spec:
           resources:
             requests:
               memory: "512Mi"
-              cpu: "500m"
+              cpu: "200m"
 
             limits:
-              memory: "512Mi"
-              cpu: "500m"
+              memory: "768Mi"
