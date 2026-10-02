@@ -9,8 +9,6 @@ metadata:
     app.kubernetes.io/component: backend
 
 spec:
-  replicas: 2
-
   selector:
     matchLabels:
       app.kubernetes.io/name: wealth-service
@@ -52,6 +50,12 @@ spec:
                   name: wealth-service-db
                   key: password
 
+            - name: JAVA_TOOL_OPTIONS
+              value: "-XX:MaxRAMPercentage=65"
+
+            - name: MANAGEMENT_ENDPOINT_HEALTH_PROBES_ENABLED
+              value: "true"
+
             - name: OTEL_SERVICE_NAME
               value: wealth-service
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
@@ -71,24 +75,31 @@ spec:
             - name: OTEL_RESOURCE_ATTRIBUTES
               value: deployment.environment=homelab,service.namespace=wealth-service
 
+          startupProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: http
+            periodSeconds: 5
+            failureThreshold: 30
+
           readinessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/readiness
               port: http
-            initialDelaySeconds: 30
             periodSeconds: 10
+            failureThreshold: 3
 
           livenessProbe:
             httpGet:
-              path: /actuator/health
+              path: /actuator/health/liveness
               port: http
-            initialDelaySeconds: 60
             periodSeconds: 30
+            failureThreshold: 3
 
           resources:
             requests:
               memory: "512Mi"
-              cpu: "5000m"
+              cpu: "500m"
 
             limits:
               memory: "512Mi"
