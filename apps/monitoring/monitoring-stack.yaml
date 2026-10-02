@@ -32,9 +32,12 @@ spec:
             evaluationInterval: 60s
             resources:
               requests:
-                memory: 400Mi
-              limits:
+                # The pod was OOMKilled at a 600Mi limit, so the working set is
+                # above 600Mi. Request what is already being consumed; leave the
+                # limit at 2x that.
                 memory: 600Mi
+              limits:
+                memory: 1200Mi
             storageSpec:
               volumeClaimTemplate:
                 spec:

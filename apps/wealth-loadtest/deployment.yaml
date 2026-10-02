@@ -9,7 +9,10 @@ metadata:
     app.kubernetes.io/component: backend
 
 spec:
-  replicas: 1
+  # Paused: the k6 harness was a one-off experiment. The CronJob that drives it
+  # is already `suspend: true`; to run tests again, scale this back to 1 first:
+  #   kubectl -n wealth-loadtest scale deploy/wealth-service-loadtest --replicas=1
+  replicas: 0
 
   # One replica bound to the shared PostgreSQL instance; a rolling update would
   # briefly run two instances against the same database.

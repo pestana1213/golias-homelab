@@ -4,7 +4,8 @@ metadata:
   name: controlhub-db
   namespace: task-manager
 spec:
-  replicas: 1
+  # Paused: not in use. See pvc.yaml, which is preserved.
+  replicas: 0
   selector:
     matchLabels:
       app: controlhub-db

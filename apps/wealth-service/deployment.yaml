@@ -14,11 +14,14 @@ spec:
       app.kubernetes.io/name: wealth-service
       app.kubernetes.io/instance: wealth-service
 
+  # With hpa.yaml at minReplicas: 1, maxUnavailable: 1 would mean zero serving
+  # pods for the whole JVM startup. Surge instead: the node has headroom, and
+  # maxUnavailable: 0 guarantees the last pod stays up through the rollout.
   strategy:
     type: RollingUpdate
     rollingUpdate:
-      maxSurge: 0
-      maxUnavailable: 1
+      maxSurge: 1
+      maxUnavailable: 0
 
   template:
     metadata:

@@ -196,7 +196,10 @@ metadata:
   labels:
     app: homepage
 spec:
-  replicas: 1
+  # Paused: not in use. The exposed host home.local will stop resolving while
+  # paused. Note the image is :latest with imagePullPolicy: Always, so a restore
+  # may pick up a different build than the one you paused.
+  replicas: 0
   selector:
     matchLabels:
       app: homepage

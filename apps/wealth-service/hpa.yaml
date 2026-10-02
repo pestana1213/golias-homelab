@@ -11,24 +11,38 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: wealth-service
-  minReplicas: 2
-  maxReplicas: 5
+
+  # Single-node homelab. A high maxReplicas does not buy capacity here, it only
+  # converts load spikes into Pending pods: the scheduler has nowhere to put the
+  # third pod, so maxReplicas: 5 was the mechanical cause of FailedScheduling.
+  #
+  # minReplicas 1 is affordable now that the load-test harness is paused. The
+  # Deployment pairs this with maxSurge: 1 / maxUnavailable: 0, so a rollout
+  # still never drops the last serving pod.
+  minReplicas: 1
+  maxReplicas: 2
+
   metrics:
     - type: Resource
       resource:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: 70
+          # 80% of 200m = 160m. The previous 70% (140m) sat below the sustained
+          # cost of JVM startup, so every deploy or GC pause drove a scale-up.
+          averageUtilization: 80
+
   behavior:
     scaleUp:
-      stabilizationWindowSeconds: 60
+      # A JVM that starts at ~0.5 cores must not be read as sustained load.
+      stabilizationWindowSeconds: 180
       policies:
-        - type: Pods
-          value: 2
+        - type: Percent
+          value: 100
           periodSeconds: 60
     scaleDown:
-      stabilizationWindowSeconds: 300
+      # Slow to scale down so a rollout does not fight the autoscaler.
+      stabilizationWindowSeconds: 600
       policies:
         - type: Pods
           value: 1

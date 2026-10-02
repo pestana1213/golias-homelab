@@ -4,7 +4,9 @@ metadata:
   name: task-manager
   namespace: task-manager
 spec:
-  replicas: 1
+  # Paused: not in use. The PVC in pvc.yaml is untouched by scaling to zero.
+  # The exposed host task-manager.golias.home will stop resolving while paused.
+  replicas: 0
   selector:
     matchLabels:
       app: task-manager

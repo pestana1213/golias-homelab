@@ -4,7 +4,9 @@ metadata:
   name: minecraft
   namespace: minecraft
 spec:
-  replicas: 1
+  # Paused: not in use. The volumeClaimTemplates PVC is untouched by scaling to
+  # zero and survives it. Restore with replicas: 1.
+  replicas: 0
   serviceName: minecraft-service
   selector:
     matchLabels:

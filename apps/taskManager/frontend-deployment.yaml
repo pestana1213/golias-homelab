@@ -4,7 +4,8 @@ metadata:
   name: task-manager-frontend
   namespace: task-manager
 spec:
-  replicas: 1
+  # Paused: not in use.
+  replicas: 0
   selector:
     matchLabels:
       app: task-manager-frontend
