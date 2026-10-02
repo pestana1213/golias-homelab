@@ -12,6 +12,7 @@ resources:
   - web-deployment.yaml
   - web-service.yaml
   - web-ingress.yaml
+  - hpa.yaml
 
 images:
   - name: ghcr.io/pestana1213/wealth-service
