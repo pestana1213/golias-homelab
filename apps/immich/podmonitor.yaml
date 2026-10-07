@@ -1,0 +1,27 @@
+# Scrapes both Immich telemetry endpoints (API on 8081, microservices worker
+# on 8082). The cluster Prometheus runs with
+# podMonitorSelectorNilUsesHelmValues: false (apps/monitoring), which renders
+# an empty podMonitorSelector and podMonitorNamespaceSelector, so this
+# PodMonitor is selected automatically - no release label required. The same
+# pattern is used by the ServiceMonitors in homelab-metrics and control-hub.
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: immich-server
+  namespace: immich
+spec:
+  selector:
+    matchLabels:
+      app: immich-server
+  namespaceSelector:
+    matchNames:
+      - immich
+  podMetricsEndpoints:
+    # API worker: request rates, per-endpoint response times, user counts.
+    - port: metrics-api
+      path: /metrics
+      interval: 60s
+    # Microservices worker: job queue depths, job completion counters.
+    - port: metrics-micro
+      path: /metrics
+      interval: 60s

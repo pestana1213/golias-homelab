@@ -376,6 +376,17 @@ spec:
                 stage.label_drop {
                   values = ["container_runtime"]
                 }
+                // OpenObserve routes Loki pushes by the o2_stream_name label
+                // (everything else lands in the "default" stream). Tag Immich
+                // namespace logs so they are stored in the immich_logs stream.
+                stage.match {
+                  selector = "{namespace=\"immich\"}"
+                  stage.static_labels {
+                    values = {
+                      o2_stream_name = "immich_logs"
+                    }
+                  }
+                }
                 forward_to = [loki.write.local.receiver, loki.write.openobserve.receiver]
               }
 

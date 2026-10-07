@@ -35,6 +35,11 @@ spec:
           imagePullPolicy: Always
           ports:
             - containerPort: 2283
+            # Prometheus metrics, enabled by IMMICH_TELEMETRY_INCLUDE below.
+            - containerPort: 8081
+              name: metrics-api
+            - containerPort: 8082
+              name: metrics-micro
           env:
             - name: DB_HOSTNAME
               value: immich-postgres
@@ -53,6 +58,14 @@ spec:
               value: /usr/src/app/upload
             - name: IMMICH_MACHINE_LEARNING_URL
               value: http://immich-machine-learning:3003
+            # Expose metrics on :8081 (API) and :8082 (microservices); scraped
+            # by the PodMonitor in podmonitor.yaml.
+            - name: IMMICH_TELEMETRY_INCLUDE
+              value: all
+            # JSON logs so the Alloy pipeline can ship structured logs to
+            # OpenObserve (stream immich_logs).
+            - name: IMMICH_LOG_FORMAT
+              value: json
           volumeMounts:
             - name: library
               mountPath: /usr/src/app/upload
