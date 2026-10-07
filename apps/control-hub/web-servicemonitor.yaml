@@ -1,0 +1,13 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: golias-web
+  namespace: control-hub
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: golias-web
+  endpoints:
+    - port: http
+      path: /api/metrics
+      interval: 30s

@@ -1,0 +1,329 @@
+{
+  "version": 8,
+  "dashboardId": "8126473910582746112",
+  "title": "Golias Web",
+  "description": "Dashboard traffic, cluster API proxy health, errors, and Node.js runtime metrics for Golias Web.",
+  "role": "",
+  "owner": "joaonogueiracontacto@gmail.com",
+  "created": "2026-10-07T10:00:00.000Z",
+  "tabs": [
+    {
+      "tabId": "overview",
+      "name": "Overview",
+      "panels": [
+        {
+          "id": "golias_web_dashboard_request_rate",
+          "type": "line",
+          "title": "Dashboard request rate",
+          "description": "Dashboard page requests per second, by route.",
+          "config": {
+            "show_legends": true,
+            "legends_position": "bottom",
+            "unit": "custom",
+            "unit_custom": "req/s",
+            "decimals": 3,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "sum by (route) (rate(golias_web_requests_total[$__rate_interval]))",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "golias_web_requests_total",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": { "filterType": "group", "logicalOperator": "AND", "conditions": [] },
+                "promql_operations": []
+              },
+              "config": { "promql_legend": "{{route}}", "query_label": "" }
+            }
+          ],
+          "layout": { "x": 0, "y": 0, "w": 48, "h": 14, "i": 1 },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        },
+        {
+          "id": "golias_web_cluster_api_rate",
+          "type": "line",
+          "title": "Cluster API request rate",
+          "description": "Requests proxied to the cluster API (control-hub) per second, by response status.",
+          "config": {
+            "show_legends": true,
+            "legends_position": "bottom",
+            "unit": "custom",
+            "unit_custom": "req/s",
+            "decimals": 3,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "sum by (status) (rate(golias_web_cluster_api_requests_total[$__rate_interval]))",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "golias_web_cluster_api_requests_total",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": { "filterType": "group", "logicalOperator": "AND", "conditions": [] },
+                "promql_operations": []
+              },
+              "config": { "promql_legend": "HTTP {{status}}", "query_label": "" }
+            }
+          ],
+          "layout": { "x": 48, "y": 0, "w": 48, "h": 14, "i": 2 },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        },
+        {
+          "id": "golias_web_cluster_api_latency",
+          "type": "line",
+          "title": "Average cluster API latency",
+          "description": "Mean duration of each request proxied to the cluster API over the selected rate interval.",
+          "config": {
+            "show_legends": true,
+            "legends_position": "bottom",
+            "unit": "seconds",
+            "unit_custom": "",
+            "decimals": 3,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "sum(rate(golias_web_cluster_api_request_duration_seconds_sum[$__rate_interval])) / clamp_min(sum(rate(golias_web_cluster_api_request_duration_seconds_count[$__rate_interval])), 0.000001)",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "golias_web_cluster_api_request_duration_seconds_sum",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": { "filterType": "group", "logicalOperator": "AND", "conditions": [] },
+                "promql_operations": []
+              },
+              "config": { "promql_legend": "Cluster API", "query_label": "" }
+            }
+          ],
+          "layout": { "x": 0, "y": 14, "w": 48, "h": 14, "i": 3 },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        },
+        {
+          "id": "golias_web_cluster_api_up",
+          "type": "line",
+          "title": "Cluster API reachable",
+          "description": "Whether the most recent cluster API call reached it (100%) or failed at the transport level (0%).",
+          "config": {
+            "show_legends": false,
+            "legends_position": null,
+            "unit": "percent-1",
+            "unit_custom": "",
+            "decimals": 0,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "max(golias_web_cluster_api_up)",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "golias_web_cluster_api_up",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": { "filterType": "group", "logicalOperator": "AND", "conditions": [] },
+                "promql_operations": []
+              },
+              "config": { "promql_legend": "Reachable", "query_label": "" }
+            }
+          ],
+          "layout": { "x": 48, "y": 14, "w": 48, "h": 14, "i": 4 },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        },
+        {
+          "id": "golias_web_request_errors",
+          "type": "line",
+          "title": "Server errors",
+          "description": "Server errors reported by Next.js (render and route failures) per second, by route.",
+          "config": {
+            "show_legends": true,
+            "legends_position": "bottom",
+            "unit": "custom",
+            "unit_custom": "err/s",
+            "decimals": 3,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "sum by (route) (rate(golias_web_request_errors_total[$__rate_interval]))",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "golias_web_request_errors_total",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": { "filterType": "group", "logicalOperator": "AND", "conditions": [] },
+                "promql_operations": []
+              },
+              "config": { "promql_legend": "{{route}}", "query_label": "" }
+            }
+          ],
+          "layout": { "x": 0, "y": 28, "w": 48, "h": 14, "i": 5 },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        },
+        {
+          "id": "golias_web_eventloop_lag",
+          "type": "line",
+          "title": "Event loop lag",
+          "description": "Maximum Node.js event loop lag reported by the dashboard process.",
+          "config": {
+            "show_legends": false,
+            "legends_position": null,
+            "unit": "seconds",
+            "unit_custom": "",
+            "decimals": 3,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "max(nodejs_eventloop_lag_seconds)",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "nodejs_eventloop_lag_seconds",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": { "filterType": "group", "logicalOperator": "AND", "conditions": [] },
+                "promql_operations": []
+              },
+              "config": { "promql_legend": "Event loop lag", "query_label": "" }
+            }
+          ],
+          "layout": { "x": 48, "y": 28, "w": 48, "h": 14, "i": 6 },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        },
+        {
+          "id": "golias_web_memory",
+          "type": "line",
+          "title": "Resident memory",
+          "description": "Resident memory used by the golias-web process.",
+          "config": {
+            "show_legends": false,
+            "legends_position": null,
+            "unit": "bytes",
+            "unit_custom": "",
+            "decimals": 2,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "sum(process_resident_memory_bytes{namespace=\"control-hub\",service=\"golias-web\"})",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "process_resident_memory_bytes",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": { "filterType": "group", "logicalOperator": "AND", "conditions": [] },
+                "promql_operations": []
+              },
+              "config": { "promql_legend": "Resident memory", "query_label": "" }
+            }
+          ],
+          "layout": { "x": 0, "y": 42, "w": 48, "h": 14, "i": 7 },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        },
+        {
+          "id": "golias_web_cpu",
+          "type": "line",
+          "title": "Process CPU usage",
+          "description": "CPU utilization reported by the golias-web process.",
+          "config": {
+            "show_legends": false,
+            "legends_position": null,
+            "unit": "percent-1",
+            "unit_custom": "",
+            "decimals": 2,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "avg(rate(process_cpu_seconds_total{namespace=\"control-hub\",service=\"golias-web\"}[$__rate_interval]))",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "process_cpu_seconds_total",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": { "filterType": "group", "logicalOperator": "AND", "conditions": [] },
+                "promql_operations": []
+              },
+              "config": { "promql_legend": "CPU", "query_label": "" }
+            }
+          ],
+          "layout": { "x": 48, "y": 42, "w": 48, "h": 14, "i": 8 },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        }
+      ]
+    }
+  ],
+  "variables": {
+    "list": [],
+    "showDynamicFilters": true
+  },
+  "defaultDatetimeDuration": {
+    "type": "relative",
+    "relativeTimePeriod": "1h"
+  }
+}
