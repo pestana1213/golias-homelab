@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: url-shortner
+  labels:
+    app: url-shortner
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: url-shortner
+  template:
+    metadata:
+      labels:
+        app: url-shortner
+    spec:
+      containers:
+        - name: url-shortner
+          image: ghcr.io/pestana1213/url-shortner
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"

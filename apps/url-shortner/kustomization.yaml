@@ -1,0 +1,16 @@
+resources:
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+  - servicemonitor.yaml
+  - postgres.yaml
+  - postgres-service.yaml
+  - pvc.yaml
+  - external-secret.yaml
+  - external-db-secret.yaml
+  
+
+images:
+  - name: ghcr.io/pestana1213/url-shortner
+    newTag: ab21e10d0a8043f8c448eef2f6890bbf5954f901
+  

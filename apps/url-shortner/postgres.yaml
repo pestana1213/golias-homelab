@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: url-shortner-postgres
+  labels:
+    app: url-shortner-postgres
+spec:
+  serviceName: url-shortner-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: url-shortner-postgres
+  template:
+    metadata:
+      labels:
+        app: url-shortner-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:17
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: urlshortner
+            - name: POSTGRES_USER
+              value: urlshortner
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: url-shortner-db-secret
+                  key: password
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 5Gi
