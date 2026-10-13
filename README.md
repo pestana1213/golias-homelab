@@ -65,10 +65,8 @@ Configure your ESP32 with:
 Secrets are managed with [HashiCorp Vault](apps/vault/README.md) and External Secrets Operator.
 
 - Vault UI available at `https://vault` on the Tailscale network (login with root token)
-- Vault **reseals on every pod restart** — unseal with:
-  ```bash
-  kubectl exec -n vault vault-helm-0 -- vault operator unseal <unseal-key>
-  ```
+- Vault auto-unseals on restart via an `auto-unseal` sidecar that reads the
+  unseal key from the `vault-unseal-key` Secret (see `apps/vault/README.md`)
 - Store the unseal key and root token in Vaultwarden
 - All app secrets are defined as `ExternalSecret` resources — ESO syncs them from Vault automatically
 

@@ -69,14 +69,33 @@ kubectl rollout restart deployment/<app> -n <namespace>
 - `:externalsecrets` — check sync status across all namespaces, `SecretSynced` = healthy
 - `:clustersecretstores` — confirm `vault` shows `Valid` and `Ready: True`
 
-## Vault sealed after restart
+## Auto-unseal
 
-Every time `vault-helm-0` restarts (node reboot, crash, update), Vault becomes **sealed** and all ExternalSecrets will show `SecretSyncedError` in k9s. Unseal with:
+Vault uses Shamir sealing, so it seals on every pod restart (node reboot, crash,
+update). An `auto-unseal` sidecar runs alongside the Vault server: it reads the
+unseal key from the `vault-unseal-key` Secret and unseals automatically whenever
+Vault reports as sealed. No manual action is needed after a restart.
+
+One-time setup (the key is not stored in Git):
+
 ```bash
-kubectl exec -n vault vault-helm-0 -- vault operator unseal <unseal-key>
+kubectl create secret generic vault-unseal-key -n vault \
+  --from-literal=unseal-key='<unseal-key>'
+```
+
+If the pod stays `CreateContainerConfigError`, the `vault-unseal-key` Secret is
+missing. If ExternalSecrets show `SecretSyncedError` in k9s after a restart,
+check the sidecar logs:
+
+```bash
+kubectl logs -n vault vault-helm-0 -c auto-unseal
 ```
 
 Store the unseal key and root token in Vaultwarden.
+
+> Security note: the unseal key lives in a Kubernetes Secret, so anyone who can
+> read Secrets in the `vault` namespace can unseal Vault. This is the standard
+> homelab tradeoff versus a cloud KMS / Transit auto-unseal.
 
 ## Vault access
 

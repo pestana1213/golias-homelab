@@ -27,6 +27,33 @@ spec:
               memory: 128Mi
             limits:
               memory: 256Mi
+          extraContainers:
+            - name: auto-unseal
+              image: hashicorp/vault:1.18.1
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  while true; do
+                    if ! vault status >/dev/null 2>&1; then
+                      vault operator unseal "$VAULT_UNSEAL_KEY" >/dev/null 2>&1 || true
+                    fi
+                    sleep 5
+                  done
+              env:
+                - name: VAULT_ADDR
+                  value: http://127.0.0.1:8200
+                - name: VAULT_UNSEAL_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: vault-unseal-key
+                      key: unseal-key
+              resources:
+                requests:
+                  memory: 32Mi
+                limits:
+                  memory: 64Mi
   destination:
     server: https://kubernetes.default.svc
     namespace: vault
