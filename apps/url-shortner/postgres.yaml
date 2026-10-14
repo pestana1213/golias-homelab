@@ -24,11 +24,14 @@ spec:
             - name: POSTGRES_DB
               value: urlshortner
             - name: POSTGRES_USER
-              value: url
+              valueFrom:
+                secretKeyRef:
+                  name: url-shortner/database
+                  key: username
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: url-shortner-db
+                  name: url-shortner/database
                   key: password
           volumeMounts:
             - name: data
