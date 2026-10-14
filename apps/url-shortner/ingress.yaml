@@ -1,12 +1,18 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: url-shortner-ingress
-  annotations:
-    kubernetes.io/ingress.class: traefik
+  name: url-shortner
+  namespace: url-shortner
+  labels:
+    app.kubernetes.io/name: url-shortner
+    app.kubernetes.io/instance: url-shortner
 spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - url-shortner
   rules:
-    - host: url-shortner.homelab.local
+    - host: url-shortner
       http:
         paths:
           - path: /
