@@ -27,6 +27,15 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "prd"
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://url-shortner-postgres:5432/urlshortner
+            - name: SPRING_DATASOURCE_USERNAME
+              value: urlshortner
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: url-shortner-db
+                  key: password
             - name: OTEL_SERVICE_NAME
               value: url-shortner
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
@@ -45,18 +54,6 @@ spec:
               value: "0.25"
             - name: OTEL_RESOURCE_ATTRIBUTES
               value: deployment.environment=homelab,service.namespace=url-shortner
-            - name: SPRING_DATASOURCE_URL
-              value: jdbc:postgresql://url-shortner-postgres:5432/urlshortner
-            - name: SPRING_DATASOURCE_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: url-shortner/database
-                  key: username
-            - name: SPRING_DATASOURCE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: url-shortner/database
-                  key: password
           resources:
             requests:
               memory: "256Mi"
