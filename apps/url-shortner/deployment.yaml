@@ -38,6 +38,16 @@ spec:
           value: "0.25"
         - name: OTEL_RESOURCE_ATTRIBUTES
           value: deployment.environment=homelab,service.namespace=url-shortner
+        - name: DB_USERNAME
+          valueFrom:
+          secretKeyRef:
+            name: url-shortner-db
+            key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: url-shortner-db
+              key: password
       containers:
         - name: url-shortner
           image: ghcr.io/pestana1213/url-shortner
