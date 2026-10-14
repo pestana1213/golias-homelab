@@ -29,9 +29,12 @@ spec:
               value: "prd"
             - name: SPRING_DATASOURCE_URL
               value: jdbc:postgresql://url-shortner-postgres:5432/urlshortner
-            - name: SPRING_DATASOURCE_USERNAME
-              value: urlshortner
-            - name: SPRING_DATASOURCE_PASSWORD
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: url-shortner-db
+                  key: username
+            - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: url-shortner-db
