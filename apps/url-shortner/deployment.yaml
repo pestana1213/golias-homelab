@@ -48,6 +48,8 @@ spec:
             secretKeyRef:
               name: url-shortner-db
               key: password
+      imagePullSecrets:
+        - name: ghcr
       containers:
         - name: url-shortner
           image: ghcr.io/pestana1213/url-shortner
