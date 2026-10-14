@@ -24,7 +24,7 @@ spec:
             - name: POSTGRES_DB
               value: urlshortner
             - name: POSTGRES_USER
-              value: urlshortner
+              value: url
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
