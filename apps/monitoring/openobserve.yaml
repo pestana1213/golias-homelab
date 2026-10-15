@@ -23,14 +23,13 @@ spec:
           ZO_CLUSTER_NAME: golias
           ZO_TELEMETRY: "false"
           ZO_USAGE_REPORTING_ENABLED: "false"
-          # Keep the three signal-type memtables comfortably below the pod
-          # memory limit and flush them to the persistent volume frequently.
+          # Bound in-memory buffering; leave headroom for queries and compaction.
           ZO_MAX_FILE_SIZE_IN_MEMORY: "64"
           ZO_MAX_FILE_SIZE_ON_DISK: "64"
           ZO_MEM_TABLE_MAX_SIZE: "768"
           ZO_MAX_FILE_RETENTION_TIME: "60"
           ZO_MEM_PERSIST_INTERVAL: "5"
-          # Match Prometheus's three-day retention when remote-write replays WAL.
+          # Allow delayed samples during Prometheus WAL replay (hours).
           ZO_INGEST_ALLOWED_UPTO: "72"
         resources:
           requests:

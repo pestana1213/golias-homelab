@@ -14,7 +14,7 @@ spec:
       valuesObject:
         prometheus:
           prometheusSpec:
-            # Alloy writes metrics received over OTLP to this endpoint.
+            # Alloy writes application metrics received over OTLP to this endpoint.
             enableRemoteWriteReceiver: true
             remoteWrite:
               - url: http://openobserve-openobserve-standalone:5080/api/default/prometheus/api/v1/write
@@ -32,16 +32,14 @@ spec:
             evaluationInterval: 60s
             resources:
               requests:
-                # The pod was OOMKilled at a 600Mi limit, so the working set is
-                # above 600Mi. Request what is already being consumed; leave the
-                # limit at 2x that.
                 memory: 600Mi
               limits:
                 memory: 1200Mi
             storageSpec:
               volumeClaimTemplate:
                 spec:
-                  accessModes: ["ReadWriteOnce"]
+                  accessModes:
+                    - ReadWriteOnce
                   resources:
                     requests:
                       storage: 10Gi
@@ -49,13 +47,9 @@ spec:
             podMonitorSelectorNilUsesHelmValues: false
         grafana:
           enabled: true
-          # Logs Drilldown releases require Grafana 11.6.11 or newer. The
-          # kube-prometheus-stack 70.4.0 default (11.6.0) cannot resolve the
-          # plugin's React runtime and returns "App not found".
+          # Logs Drilldown requires a compatible Grafana version.
           image:
             tag: 11.6.11
-          # Required for installations upgraded from Grafana versions that did
-          # not bundle the Logs Drilldown app.
           plugins:
             - https://storage.googleapis.com/integration-artifacts/grafana-lokiexplore-app/release/main/any/grafana-lokiexplore-app-main.zip;grafana-lokiexplore-app
           resources:
@@ -146,7 +140,8 @@ spec:
             storage:
               volumeClaimTemplate:
                 spec:
-                  accessModes: ["ReadWriteOnce"]
+                  accessModes:
+                    - ReadWriteOnce
                   resources:
                     requests:
                       storage: 5Gi
@@ -176,8 +171,7 @@ spec:
       valuesObject:
         loki:
           enabled: true
-          # loki-stack 2.10.2 defaults to Loki 2.6.1, whose LogQL parser does
-          # not support the vector() query used by current Grafana health checks.
+          # Override the old chart default with a Loki version supporting current health queries.
           image:
             tag: 2.9.8
           config:
@@ -186,8 +180,8 @@ spec:
           persistence:
             enabled: true
             size: 10Gi
+        # Log collection is handled by Grafana Alloy.
         promtail:
-          # Log collection is handled by Grafana Alloy below.
           enabled: false
         grafana:
           enabled: false
@@ -274,6 +268,10 @@ spec:
                 secretKeyRef:
                   name: openobserve-root
                   key: OPENOBSERVE_INGEST_PASSWORD
+            - name: K8S_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
           mounts:
             varlog: true
           extraPorts:
@@ -288,13 +286,13 @@ spec:
               protocol: TCP
           resources:
             requests:
-              cpu: 50m
-              memory: 128Mi
+              cpu: 200m
+              memory: 512Mi
             limits:
-              memory: 256Mi
+              memory: 1Gi
           configMap:
             content: |-
-              // Collect every pod's stdout/stderr logs from the local node.
+              // Collect pod stdout/stderr logs from the local node.
               discovery.kubernetes "pods" {
                 role = "pod"
                 selectors {
@@ -318,8 +316,6 @@ spec:
                   source_labels = ["__meta_kubernetes_pod_container_name"]
                   target_label  = "container"
                 }
-                // Grafana Logs Drilldown discovers workloads through service_name.
-                // Start with the pod name, then prefer its controller and app labels.
                 rule {
                   source_labels = ["__meta_kubernetes_pod_name"]
                   target_label  = "service_name"
@@ -370,30 +366,22 @@ spec:
 
               loki.process "pod_logs" {
                 stage.match {
-                  selector = "{container_runtime=~\"containerd|cri-o\"}"
+                  selector = "{container_runtime=~\\"containerd|cri-o\\"}"
                   stage.cri {}
                 }
                 stage.label_drop {
                   values = ["container_runtime"]
                 }
-                // OpenObserve routes Loki pushes by the o2_stream_name label
-                // (everything else lands in the "default" stream). Tag Immich
-                // namespace logs so they are stored in the immich_logs stream.
                 stage.match {
-                  selector = "{namespace=\"immich\"}"
+                  selector = "{namespace=\\"immich\\"}"
                   stage.static_labels {
                     values = {
                       o2_stream_name = "immich_logs"
                     }
                   }
                 }
-                forward_to = [loki.write.local.receiver, loki.write.openobserve.receiver]
-              }
-
-              loki.write "local" {
-                endpoint {
-                  url = "http://loki-stack:3100/loki/api/v1/push"
-                }
+                // Send collected logs to OpenObserve.
+                forward_to = [loki.write.openobserve.receiver]
               }
 
               loki.write "openobserve" {
@@ -415,6 +403,18 @@ spec:
                   endpoint = "0.0.0.0:4318"
                 }
                 output {
+                  logs    = [otelcol.processor.memory_limiter.apps.input]
+                  metrics = [otelcol.processor.memory_limiter.apps.input]
+                  traces  = [otelcol.processor.memory_limiter.apps.input]
+                }
+              }
+
+              // Protect Alloy from bursts before batching/exporting telemetry.
+              otelcol.processor.memory_limiter "apps" {
+                check_interval         = "1s"
+                limit_percentage       = 80
+                spike_limit_percentage = 25
+                output {
                   logs    = [otelcol.processor.batch.apps.input]
                   metrics = [otelcol.processor.batch.apps.input]
                   traces  = [otelcol.processor.batch.apps.input, otelcol.connector.servicegraph.apps.input]
@@ -423,22 +423,20 @@ spec:
 
               otelcol.processor.batch "apps" {
                 output {
-                  logs    = [otelcol.exporter.loki.apps.input, otelcol.exporter.otlphttp.openobserve.input]
-                  metrics = [otelcol.exporter.prometheus.apps.input, otelcol.exporter.otlphttp.openobserve.input]
-                  traces  = [otelcol.exporter.otlp.tempo.input, otelcol.exporter.otlphttp.openobserve.input]
+                  logs    = [otelcol.exporter.otlphttp.openobserve.input]
+                  // Send metrics through Prometheus only; Prometheus remote-writes them
+                  // to OpenObserve. Do not export the same metrics directly as OTLP too.
+                  metrics = [otelcol.exporter.prometheus.apps.input]
+                  traces  = [otelcol.exporter.otlphttp.openobserve.input]
                 }
               }
 
-              // Derive service dependency metrics used by Grafana's Service Map.
+              // Derive service dependency metrics and send them through Prometheus.
               otelcol.connector.servicegraph "apps" {
                 dimensions = ["deployment.environment"]
                 output {
                   metrics = [otelcol.exporter.prometheus.apps.input]
                 }
-              }
-
-              otelcol.exporter.loki "apps" {
-                forward_to = [loki.write.local.receiver]
               }
 
               otelcol.exporter.prometheus "apps" {
@@ -448,15 +446,6 @@ spec:
               prometheus.remote_write "local" {
                 endpoint {
                   url = "http://kube-prometheus-stack-prometheus:9090/api/v1/write"
-                }
-              }
-
-              otelcol.exporter.otlp "tempo" {
-                client {
-                  endpoint = "tempo:4317"
-                  tls {
-                    insecure = true
-                  }
                 }
               }
 
