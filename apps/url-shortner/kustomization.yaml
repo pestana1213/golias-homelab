@@ -12,5 +12,5 @@ resources:
 
 images:
   - name: ghcr.io/pestana1213/url-shortner
-    newTag: 65407ade93de4cab1c75f901844b85369455a0ed
+    newTag: c3cd10b36e8a5071543f91f8880253810951305e
   
