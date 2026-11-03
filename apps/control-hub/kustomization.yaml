@@ -15,6 +15,6 @@ resources:
   - web-servicemonitor.yaml
 images:
   - name: ghcr.io/pestana1213/control-hub
-    newTag: f2aa254513db3a3eeea53cdb4e0aa3ac3bcd4008
+    newTag: 787badcd6b24bc4bffaeb75167a58a09e4c993ce
   - name: ghcr.io/pestana1213/golias-web
     newTag: 01fab9ceba50a83f7f4b6038cc4f046a6485ebba
