@@ -1,0 +1,25 @@
+# ZITADEL serves Prometheus metrics at /debug/metrics on its normal port, with
+# no configuration needed: the default Metrics.Type is otel, and setting it to
+# none is what would disable the endpoint.
+#
+# Prometheus here runs with serviceMonitorSelectorNilUsesHelmValues: false, so
+# it picks up every ServiceMonitor in every namespace and this needs no label to
+# be discovered. The selector below matches the chart's own Service labels.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: zitadel
+  namespace: zitadel
+  labels:
+    app.kubernetes.io/name: zitadel
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: zitadel
+      app.kubernetes.io/instance: zitadel-helm
+  endpoints:
+    # The Service declares appProtocol h2c, but the port also answers plain
+    # HTTP/1.1, which is what Prometheus speaks.
+    - port: http2-server
+      path: /debug/metrics
+      interval: 30s
