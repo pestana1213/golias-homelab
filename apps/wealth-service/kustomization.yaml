@@ -2,6 +2,7 @@ resources:
   - namespace.yaml
   - external-secret.yaml
   - external-db-secret.yaml
+  - web-auth-secret.yaml
   - pvc.yaml
   - postgres.yaml
   - postgres-service.yaml

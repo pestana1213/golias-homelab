@@ -40,6 +40,36 @@ spec:
             - name: WEALTH_API_URL
               value: http://wealth-service.wealth-service.svc.cluster.local:8080
 
+            # The public address, used to build the OIDC redirect_uri. It has to
+            # be set here: behind the Tailscale ingress the pod sees an internal
+            # host, and a redirect_uri built from that would not match the one
+            # registered in Zitadel.
+            - name: APP_BASE_URL
+              value: https://wealth.tail654c62.ts.net
+
+            # Must be the public issuer even from inside the cluster, because it
+            # is compared against the `iss` claim of every token.
+            - name: ZITADEL_ISSUER
+              value: https://zitadel.tail654c62.ts.net
+
+            - name: ZITADEL_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: wealth-frontend-auth
+                  key: clientId
+
+            - name: ZITADEL_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: wealth-frontend-auth
+                  key: clientSecret
+
+            - name: SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: wealth-frontend-auth
+                  key: sessionSecret
+
           readinessProbe:
             httpGet:
               path: /
