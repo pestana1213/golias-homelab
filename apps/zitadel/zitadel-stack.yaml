@@ -27,6 +27,8 @@ spec:
 
         zitadel:
           masterkeySecretName: zitadel-masterkey
+          # The admin password, from Vault. Merged over configmapConfig at startup.
+          configSecretName: zitadel-config
 
           configmapConfig:
             # CHANGE ME: the real MagicDNS name of the Tailscale device.
@@ -37,13 +39,22 @@ spec:
             TLS:
               Enabled: false
 
-            # The first admin. Registration stays closed, so every other account
-            # is created from the console by hand until that changes.
+            # The first admin. Its password comes from the Secret above, not from
+            # here. Registration stays closed, so every other account is created
+            # from the console by hand until that changes.
+            #
+            # Email.Verified is true because no SMTP is configured yet: an
+            # unverified address would leave the account unable to finish login.
             FirstInstance:
               Org:
                 Human:
                   UserName: admin
+                  FirstName: Joao
+                  LastName: Nogueira
                   PasswordChangeRequired: true
+                  Email:
+                    Address: joaonogueiracontacto@gmail.com
+                    Verified: true
 
 
         # Top-level in this chart, not under zitadel. With a DSN set, ZITADEL

@@ -20,6 +20,7 @@ on their Secrets.
 | `zitadel/database` | `username`, `password` | PostgreSQL superuser. The DSN is templated from these by `external-secret.yaml`. |
 | `zitadel/masterkey` | `masterkey` | Exactly 32 characters. |
 | `zitadel/login` | `sessionCookieSecret`, `tlsCrt`, `tlsKey` | Cookie signing secret, and the keypair the Login UI authenticates to ZITADEL with. |
+| `zitadel/admin` | `password` | The first admin's password. Reaches ZITADEL as a config fragment, so it is never in Git. |
 
 Generate them:
 
@@ -52,15 +53,28 @@ URLs and cookie domain from it. The short `zitadel` host in the ingress is what
 names the device; it is not what the browser sends.
 
 ```bash
+# The suffix is the same one the other apps already use
+tailscale status --json | jq -r .MagicDNSSuffix
 kubectl get ingress -n zitadel      # once applied, to read the assigned name
 ```
 
+`FirstInstance.Org.Human.Email.Address` is the other placeholder. Both are in
+`zitadel-stack.yaml`.
+
 ## First login
 
-The chart creates one admin from `FirstInstance.Org.Human` with username
-`admin` and `PasswordChangeRequired: true`. The chart generates the initial
-password; read it from the setup job's output or set one explicitly in
-`valuesObject` before the first apply.
+The setup job creates one human admin from `FirstInstance.Org.Human`: username
+`admin`, password from `zitadel/admin` in Vault, and `PasswordChangeRequired:
+true`, so the first login asks for a new one.
+
+`Email.Address` in `zitadel-stack.yaml` is a placeholder (`admin@CHANGEME`) and
+must be a mailbox you read. It is marked `Verified: true` on purpose: no SMTP is
+configured, so an unverified address would leave the account unable to finish
+logging in.
+
+The chart also creates a machine user `iam-admin` with `IAM_OWNER` and puts its
+JWT key in a Secret named after it — that is the chart's own default, and it is
+what you would use to drive the API from scripts.
 
 Registration is closed on purpose: accounts are created from the console by
 hand. Opening self-registration later is a login-policy toggle in the console,
