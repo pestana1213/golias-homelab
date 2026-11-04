@@ -93,16 +93,19 @@ Registration is closed on purpose: accounts are created from the console by
 hand. Opening self-registration later is a login-policy toggle in the console,
 not a change here.
 
-## Two things to verify on the first apply
+## Ingress
 
-Both come from this cluster using Tailscale ingress rather than the Traefik or
-NGINX setups the chart documents:
+Hand-written in `ingress.yaml`, with the chart's own ingresses disabled
+(`ingress.enabled: false`, `login.ingress.enabled: false`).
 
-1. **HTTP/2 to the pods.** ZITADEL serves its REST and gRPC APIs over h2c on one
-   port. The chart sets `service.appProtocol: kubernetes.io/h2c` and the Traefik
-   `serversscheme` annotation, which the Tailscale proxy ignores. The OIDC
-   endpoints are plain HTTP and will work regardless; the admin console uses
-   gRPC-web, so check it loads before relying on it.
-2. **The two ingresses share one host.** `/ui/v2/login` must reach the login
-   service and `/` the ZITADEL service. If the Tailscale operator creates two
-   devices instead of one, merge them into a single Ingress with both paths.
+The chart offers one Ingress per workload, but the Tailscale operator creates a
+**device per Ingress**: two of them registered as `zitadel` and `zitadel-1`, so
+`/ui/v2/login` ended up on a different hostname from the one `ExternalDomain`
+names, and the login redirect left the host. One Ingress with both paths keeps
+it to a single device.
+
+Still worth checking: ZITADEL serves its REST and gRPC APIs over h2c on one
+port. The chart sets `service.appProtocol: kubernetes.io/h2c` and a Traefik
+`serversscheme` annotation, neither of which the Tailscale proxy reads. The OIDC
+endpoints are plain HTTP and work regardless; the admin console uses gRPC-web,
+so confirm it loads before relying on it.

@@ -1,0 +1,37 @@
+# One Ingress, two paths, one Tailscale device. The chart can generate an
+# Ingress per workload, but the Tailscale operator creates a device per Ingress,
+# so two of them land on two hostnames (zitadel and zitadel-1) and the login
+# redirect leaves the host ZITADEL thinks it lives on. ExternalDomain must match
+# the single host below.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: zitadel
+  namespace: zitadel
+  labels:
+    app.kubernetes.io/name: zitadel
+    app.kubernetes.io/instance: zitadel
+spec:
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - zitadel
+  rules:
+    - host: zitadel
+      http:
+        paths:
+          # Login V2 is its own workload and owns this prefix.
+          - path: /ui/v2/login
+            pathType: Prefix
+            backend:
+              service:
+                name: zitadel-helm-login
+                port:
+                  number: 3000
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: zitadel-helm
+                port:
+                  number: 8080

@@ -77,19 +77,12 @@ spec:
             memory: "1Gi"
             cpu: "1"
 
-        # The chart sets the h2c service annotations itself: ZITADEL serves REST
-        # and gRPC over HTTP/2 on one port.
+        # Ingress is hand-written in ingress.yaml: one Ingress with both paths,
+        # because the Tailscale operator makes a device per Ingress and two of
+        # them split the login onto a second hostname. The chart still sets the
+        # h2c service annotations, which is what matters on the Service.
         ingress:
-          enabled: true
-          className: tailscale
-          hosts:
-            - host: zitadel
-              paths:
-                - path: /
-                  pathType: Prefix
-          tls:
-            - hosts:
-                - zitadel
+          enabled: false
 
         # Login V2 is its own deployment, served under /ui/v2/login.
         login:
@@ -101,16 +94,7 @@ spec:
           # continuously. Verified: with this set the chart emits no Secret.
           loginServiceKeySecretName: zitadel-login-service-key
           ingress:
-            enabled: true
-            className: tailscale
-            hosts:
-              - host: zitadel
-                paths:
-                  - path: /ui/v2/login
-                    pathType: Prefix
-            tls:
-              - hosts:
-                  - zitadel
+            enabled: false
 
   destination:
     server: https://kubernetes.default.svc
