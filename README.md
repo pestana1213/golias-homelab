@@ -18,6 +18,7 @@ apps/
   vault/                # HashiCorp Vault — central secret store
   external-secrets/     # External Secrets Operator — syncs Vault secrets to Kubernetes
   control-hub/          # Control plane for homelab applications
+  zitadel/              # ZITADEL — identity provider shared by every app (see app README)
   wealth-service/       # Wealth tracking — Spring Boot API + PostgreSQL, and the wealth-frontend UI (see app README)
   ...
 ```

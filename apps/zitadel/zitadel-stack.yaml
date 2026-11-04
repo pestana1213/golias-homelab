@@ -1,0 +1,109 @@
+# ZITADEL: the identity provider every app of mine authenticates against, so a
+# person needs one account for all of them. Deployed from the official chart
+# because the setup and init jobs, and the separate Login V2 workload, are not
+# worth hand-writing.
+#
+# ExternalDomain must be exactly the host the browser uses, because it generates
+# the OIDC endpoints, the redirect URLs and the cookie domain. With Tailscale
+# ingress that is the MagicDNS name, NOT the short ingress host.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: zitadel
+  namespace: argocd
+spec:
+  project: default
+  source:
+    chart: zitadel
+    repoURL: https://charts.zitadel.com
+    targetRevision: 10.4.0
+    helm:
+      valuesObject:
+        # The database lives in this repo (postgres.yaml), not in the subchart.
+        postgresql:
+          enabled: false
+
+        replicaCount: 1
+
+        zitadel:
+          masterkeySecretName: zitadel-masterkey
+
+          configmapConfig:
+            # CHANGE ME: the real MagicDNS name of the Tailscale device.
+            ExternalDomain: zitadel.TAILNET.ts.net
+            ExternalPort: 443
+            ExternalSecure: true
+            # Tailscale ingress terminates TLS; the pods speak plain HTTP.
+            TLS:
+              Enabled: false
+
+            # The first admin. Registration stays closed, so every other account
+            # is created from the console by hand until that changes.
+            FirstInstance:
+              Org:
+                Human:
+                  UserName: admin
+                  PasswordChangeRequired: true
+
+
+        # Top-level in this chart, not under zitadel. With a DSN set, ZITADEL
+        # ignores the discrete Database.Postgres.* fields.
+        env:
+          - name: ZITADEL_DATABASE_POSTGRES_DSN
+            valueFrom:
+              secretKeyRef:
+                name: zitadel-db
+                key: dsn
+
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "100m"
+          limits:
+            memory: "1Gi"
+            cpu: "1"
+
+        # The chart sets the h2c service annotations itself: ZITADEL serves REST
+        # and gRPC over HTTP/2 on one port.
+        ingress:
+          enabled: true
+          className: tailscale
+          hosts:
+            - host: zitadel
+              paths:
+                - path: /
+                  pathType: Prefix
+          tls:
+            - hosts:
+                - zitadel
+
+        # Login V2 is its own deployment, served under /ui/v2/login.
+        login:
+          enabled: true
+          sessionCookieSecretName: zitadel-login-session-cookie
+          # Supplied rather than chart-generated on purpose: ArgoCD runs
+          # `helm template` on every sync, and the chart's generated keypair
+          # differs each time, so selfHeal would rotate the login service key
+          # continuously. Verified: with this set the chart emits no Secret.
+          loginServiceKeySecretName: zitadel-login-service-key
+          ingress:
+            enabled: true
+            className: tailscale
+            hosts:
+              - host: zitadel
+                paths:
+                  - path: /ui/v2/login
+                    pathType: Prefix
+            tls:
+              - hosts:
+                  - zitadel
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: zitadel
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

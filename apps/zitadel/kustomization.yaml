@@ -1,0 +1,7 @@
+resources:
+  - namespace.yaml
+  - external-secret.yaml
+  - pvc.yaml
+  - postgres.yaml
+  - postgres-service.yaml
+  - zitadel-stack.yaml

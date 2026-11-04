@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zitadel-postgres
+  namespace: zitadel
+  labels:
+    app: zitadel-postgres
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: zitadel-postgres
+
+  template:
+    metadata:
+      labels:
+        app: zitadel-postgres
+
+    spec:
+      containers:
+        # ZITADEL requires PostgreSQL 14 or later.
+        - name: postgres
+          image: postgres:17
+
+          ports:
+            - containerPort: 5432
+              name: postgres
+
+          env:
+            - name: POSTGRES_DB
+              value: zitadel
+
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: zitadel-db
+                  key: username
+
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: zitadel-db
+                  key: password
+
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: zitadel-postgres
