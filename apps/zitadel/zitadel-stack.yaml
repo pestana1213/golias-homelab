@@ -9,7 +9,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: zitadel
+  # Not "zitadel": that is the name the per-directory Application already uses,
+  # and the two would fight over the same object. Every other chart here is
+  # named apart from its folder for the same reason (vault-helm, openobserve).
+  name: zitadel-helm
   namespace: argocd
 spec:
   project: default

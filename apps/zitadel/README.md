@@ -5,7 +5,9 @@ across apps instead of a separate login per project. Runs in the `zitadel`
 namespace with its own PostgreSQL, exposed at `https://zitadel` on the Tailscale
 network.
 
-Deployed from the official Helm chart through ArgoCD (`zitadel-stack.yaml`),
+Deployed from the official Helm chart through ArgoCD (`zitadel-stack.yaml`, the
+Application `zitadel-helm` — named apart from the folder so it does not collide
+with the per-directory Application that applies everything else here),
 because the chart owns the init and setup jobs and the separate Login V2
 workload. Everything else here follows the repo's own conventions: PostgreSQL as
 a plain Deployment, secrets from Vault through External Secrets.
@@ -21,6 +23,17 @@ on their Secrets.
 | `zitadel/masterkey` | `masterkey` | Exactly 32 characters. |
 | `zitadel/login` | `sessionCookieSecret`, `tlsCrt`, `tlsKey` | Cookie signing secret, and the keypair the Login UI authenticates to ZITADEL with. |
 | `zitadel/admin` | `password` | The first admin's password. Reaches ZITADEL as a config fragment, so it is never in Git. |
+
+The admin password must satisfy ZITADEL's default complexity policy: an
+uppercase letter, a lowercase letter, a number and a symbol. A password that
+does not fails the `03_default_instance` migration with
+`Errors.User.PasswordComplexityPolicy.*`, and the setup job exits 1 before any
+of the chart's own resources are created, which shows up in ArgoCD as every
+resource `Missing`. A plain hex or base64 string is not enough on its own:
+
+```bash
+echo "$(openssl rand -base64 12)Aa1!"
+```
 
 Generate them:
 
