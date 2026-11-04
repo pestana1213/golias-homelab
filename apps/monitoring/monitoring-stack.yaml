@@ -366,17 +366,17 @@ spec:
 
               loki.process "pod_logs" {
                 stage.match {
-                  selector = "{container_runtime=~\\"containerd|cri-o\\"}"
+                  selector = "{container_runtime=~\"containerd|cri-o\"}"
                   stage.cri {}
                 }
                 stage.label_drop {
                   values = ["container_runtime"]
                 }
                 stage.match {
-                  selector = "{namespace=\\"immich\\"}"
+                  selector = "{namespace=\"immich\"}"
                   stage.static_labels {
                     values = {
-                      o2_stream_name = "immich_logs"
+                      o2_stream_name = "immich_logs",
                     }
                   }
                 }
