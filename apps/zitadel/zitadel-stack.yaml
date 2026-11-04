@@ -35,7 +35,7 @@ spec:
 
           configmapConfig:
             # CHANGE ME: the real MagicDNS name of the Tailscale device.
-            ExternalDomain: tail654c62.ts.net
+            ExternalDomain: zitadel-1.tail654c62.ts.net
             ExternalPort: 443
             ExternalSecure: true
             # Tailscale ingress terminates TLS; the pods speak plain HTTP.
