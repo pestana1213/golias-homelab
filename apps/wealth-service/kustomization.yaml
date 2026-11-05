@@ -19,4 +19,4 @@ images:
   - name: ghcr.io/pestana1213/wealth-service
     newTag: 1b2b07d337cd14c219354acf650fb5e769154c14
   - name: ghcr.io/pestana1213/wealth-frontend
-    newTag: 882e6036e958264641577d3d6c43a525fc87bd39
+    newTag: de05de89d0f2b8f84b34006bf2e78324a8c08f4c
