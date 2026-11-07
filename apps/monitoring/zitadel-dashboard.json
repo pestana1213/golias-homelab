@@ -1,0 +1,1161 @@
+{
+  "version": 8,
+  "dashboardId": "8126473910582746240",
+  "title": "Zitadel",
+  "description": "Autenticação, pedidos, projeções, base de dados e logs da instância ZITADEL self-hosted.",
+  "role": "",
+  "owner": "joaonogueiracontacto@gmail.com",
+  "created": "2026-11-04T16:00:00.000Z",
+  "tabs": [
+    {
+      "tabId": "auth",
+      "name": "Autenticação",
+      "panels": [
+        {
+          "id": "zitadel_auth_authorize",
+          "type": "line",
+          "title": "Tentativas de login",
+          "description": "Pedidos ao endpoint de autorização, por código. Cada um é alguém a ser mandado para o ecrã de login por uma aplicação.",
+          "config": {
+            "show_legends": true,
+            "legends_position": "right",
+            "unit": "custom",
+            "unit_custom": "req/s",
+            "decimals": 3,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "sum by (return_code) (rate(http_server_return_code_counter_total{namespace=\"zitadel\", uri=~\".*/oauth/v2/authorize.*\"}[$__rate_interval]))",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "http_server_return_code_counter_total",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": {
+                  "filterType": "group",
+                  "logicalOperator": "AND",
+                  "conditions": []
+                },
+                "promql_operations": []
+              },
+              "config": {
+                "promql_legend": "HTTP {{return_code}}",
+                "query_label": ""
+              }
+            }
+          ],
+          "layout": {
+            "x": 0,
+            "y": 0,
+            "w": 96,
+            "h": 20,
+            "i": 1
+          },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        },
+        {
+          "id": "zitadel_auth_token",
+          "type": "line",
+          "title": "Trocas de token",
+          "description": "Chamadas ao token endpoint. Um 200 é um login concluído ou um refresh; um 400 ou 401 é segredo errado, código expirado ou redirect_uri que não bate.",
+          "config": {
+            "show_legends": true,
+            "legends_position": "right",
+            "unit": "custom",
+            "unit_custom": "req/s",
+            "decimals": 3,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "sum by (return_code) (rate(http_server_return_code_counter_total{namespace=\"zitadel\", uri=~\".*/oauth/v2/token.*\"}[$__rate_interval]))",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "http_server_return_code_counter_total",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": {
+                  "filterType": "group",
+                  "logicalOperator": "AND",
+                  "conditions": []
+                },
+                "promql_operations": []
+              },
+              "config": {
+                "promql_legend": "HTTP {{return_code}}",
+                "query_label": ""
+              }
+            }
+          ],
+          "layout": {
+            "x": 0,
+            "y": 20,
+            "w": 96,
+            "h": 20,
+            "i": 2
+          },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        },
+        {
+          "id": "zitadel_auth_sessions",
+          "type": "line",
+          "title": "API de sessões",
+          "description": "A UI de login fala com o SessionService para criar e validar a sessão. É o ponto mais próximo de 'login com sucesso' que as métricas oferecem.",
+          "config": {
+            "show_legends": true,
+            "legends_position": "right",
+            "unit": "custom",
+            "unit_custom": "req/s",
+            "decimals": 3,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "sum by (grpc_method, return_code) (rate(grpc_server_grpc_status_code_total{namespace=\"zitadel\", grpc_method=~\".*(Session|Login|Password|OIDC).*\"}[$__rate_interval]))",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "grpc_server_grpc_status_code_total",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": {
+                  "filterType": "group",
+                  "logicalOperator": "AND",
+                  "conditions": []
+                },
+                "promql_operations": []
+              },
+              "config": {
+                "promql_legend": "{{return_code}} {{grpc_method}}",
+                "query_label": ""
+              }
+            }
+          ],
+          "layout": {
+            "x": 0,
+            "y": 40,
+            "w": 96,
+            "h": 20,
+            "i": 3
+          },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        },
+        {
+          "id": "zitadel_auth_logout",
+          "type": "line",
+          "title": "Terminar sessão e userinfo",
+          "description": "Logouts e consultas de perfil. O userinfo é chamado uma vez por login pelo wealth-frontend.",
+          "config": {
+            "show_legends": true,
+            "legends_position": "right",
+            "unit": "custom",
+            "unit_custom": "req/s",
+            "decimals": 3,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "sum by (uri, return_code) (rate(http_server_return_code_counter_total{namespace=\"zitadel\", uri=~\".*(end_session|userinfo).*\"}[$__rate_interval]))",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "http_server_return_code_counter_total",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": {
+                  "filterType": "group",
+                  "logicalOperator": "AND",
+                  "conditions": []
+                },
+                "promql_operations": []
+              },
+              "config": {
+                "promql_legend": "{{uri}} {{return_code}}",
+                "query_label": ""
+              }
+            }
+          ],
+          "layout": {
+            "x": 0,
+            "y": 60,
+            "w": 96,
+            "h": 20,
+            "i": 4
+          },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        },
+        {
+          "id": "zitadel_auth_login_ui",
+          "type": "line",
+          "title": "UI de login (V2)",
+          "description": "Páginas servidas pelo deployment de login. Um salto aqui sem salto nas trocas de token quer dizer gente a chegar ao login e a desistir.",
+          "config": {
+            "show_legends": true,
+            "legends_position": "right",
+            "unit": "custom",
+            "unit_custom": "req/s",
+            "decimals": 3,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "sum by (uri) (rate(http_server_request_count_total{namespace=\"zitadel\", uri=~\".*/ui/v2/login.*\"}[$__rate_interval]))",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "http_server_request_count_total",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": {
+                  "filterType": "group",
+                  "logicalOperator": "AND",
+                  "conditions": []
+                },
+                "promql_operations": []
+              },
+              "config": {
+                "promql_legend": "{{uri}}",
+                "query_label": ""
+              }
+            }
+          ],
+          "layout": {
+            "x": 0,
+            "y": 80,
+            "w": 96,
+            "h": 20,
+            "i": 5
+          },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        }
+      ]
+    },
+    {
+      "tabId": "requests",
+      "name": "Pedidos",
+      "panels": [
+        {
+          "id": "zitadel_http_latency",
+          "type": "line",
+          "title": "Latência HTTP",
+          "description": "Percentis da duração dos pedidos. O histograma do ZITADEL só tem a label le, sem rota, por isso isto é o conjunto todo.",
+          "config": {
+            "show_legends": true,
+            "legends_position": "right",
+            "unit": "seconds",
+            "unit_custom": "",
+            "decimals": 3,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "histogram_quantile(0.50, sum by (le) (rate(http_server_request_duration_seconds_bucket{namespace=\"zitadel\"}[$__rate_interval])))",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "http_server_request_duration_seconds_bucket",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": {
+                  "filterType": "group",
+                  "logicalOperator": "AND",
+                  "conditions": []
+                },
+                "promql_operations": []
+              },
+              "config": {
+                "promql_legend": "p50",
+                "query_label": ""
+              }
+            },
+            {
+              "query": "histogram_quantile(0.95, sum by (le) (rate(http_server_request_duration_seconds_bucket{namespace=\"zitadel\"}[$__rate_interval])))",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "http_server_request_duration_seconds_bucket",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": {
+                  "filterType": "group",
+                  "logicalOperator": "AND",
+                  "conditions": []
+                },
+                "promql_operations": []
+              },
+              "config": {
+                "promql_legend": "p95",
+                "query_label": ""
+              }
+            },
+            {
+              "query": "histogram_quantile(0.99, sum by (le) (rate(http_server_request_duration_seconds_bucket{namespace=\"zitadel\"}[$__rate_interval])))",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "http_server_request_duration_seconds_bucket",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": {
+                  "filterType": "group",
+                  "logicalOperator": "AND",
+                  "conditions": []
+                },
+                "promql_operations": []
+              },
+              "config": {
+                "promql_legend": "p99",
+                "query_label": ""
+              }
+            }
+          ],
+          "layout": {
+            "x": 0,
+            "y": 0,
+            "w": 96,
+            "h": 20,
+            "i": 1
+          },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        },
+        {
+          "id": "zitadel_http_status",
+          "type": "line",
+          "title": "Códigos de resposta HTTP",
+          "description": "Respostas por segundo, por código. 4xx costuma ser configuração de cliente; 5xx é o ZITADEL em apuros.",
+          "config": {
+            "show_legends": true,
+            "legends_position": "right",
+            "unit": "custom",
+            "unit_custom": "req/s",
+            "decimals": 3,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "sum by (return_code) (rate(http_server_return_code_counter_total{namespace=\"zitadel\"}[$__rate_interval]))",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "http_server_return_code_counter_total",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": {
+                  "filterType": "group",
+                  "logicalOperator": "AND",
+                  "conditions": []
+                },
+                "promql_operations": []
+              },
+              "config": {
+                "promql_legend": "HTTP {{return_code}}",
+                "query_label": ""
+              }
+            }
+          ],
+          "layout": {
+            "x": 0,
+            "y": 20,
+            "w": 96,
+            "h": 20,
+            "i": 2
+          },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        },
+        {
+          "id": "zitadel_http_routes",
+          "type": "line",
+          "title": "Rotas HTTP mais pedidas",
+          "description": "As dez rotas com mais tráfego.",
+          "config": {
+            "show_legends": true,
+            "legends_position": "right",
+            "unit": "custom",
+            "unit_custom": "req/s",
+            "decimals": 3,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "topk(10, sum by (uri) (rate(http_server_request_count_total{namespace=\"zitadel\"}[$__rate_interval])))",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "http_server_request_count_total",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": {
+                  "filterType": "group",
+                  "logicalOperator": "AND",
+                  "conditions": []
+                },
+                "promql_operations": []
+              },
+              "config": {
+                "promql_legend": "{{uri}}",
+                "query_label": ""
+              }
+            }
+          ],
+          "layout": {
+            "x": 0,
+            "y": 40,
+            "w": 96,
+            "h": 20,
+            "i": 3
+          },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        },
+        {
+          "id": "zitadel_grpc_failures",
+          "type": "line",
+          "title": "Chamadas gRPC falhadas",
+          "description": "Métodos da API interna a devolver algo que não seja 200. O 401 em volume baixo é normal: é o token a expirar.",
+          "config": {
+            "show_legends": true,
+            "legends_position": "right",
+            "unit": "custom",
+            "unit_custom": "req/s",
+            "decimals": 3,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "topk(10, sum by (grpc_method, return_code) (rate(grpc_server_grpc_status_code_total{namespace=\"zitadel\", return_code!=\"200\"}[$__rate_interval])))",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "grpc_server_grpc_status_code_total",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": {
+                  "filterType": "group",
+                  "logicalOperator": "AND",
+                  "conditions": []
+                },
+                "promql_operations": []
+              },
+              "config": {
+                "promql_legend": "{{return_code}} {{grpc_method}}",
+                "query_label": ""
+              }
+            }
+          ],
+          "layout": {
+            "x": 0,
+            "y": 60,
+            "w": 96,
+            "h": 20,
+            "i": 4
+          },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        }
+      ]
+    },
+    {
+      "tabId": "internals",
+      "name": "Internos",
+      "panels": [
+        {
+          "id": "zitadel_projection_latency",
+          "type": "line",
+          "title": "Atraso das projeções (p95)",
+          "description": "Idade dos últimos eventos processados por projeção. Se cresce, o modelo de leitura está atrasado e a consola mostra dados velhos.",
+          "config": {
+            "show_legends": true,
+            "legends_position": "right",
+            "unit": "seconds",
+            "unit_custom": "",
+            "decimals": 2,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "histogram_quantile(0.95, sum by (projection, le) (rate(projection_state_latency_seconds_bucket{namespace=\"zitadel\"}[$__rate_interval])))",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "projection_state_latency_seconds_bucket",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": {
+                  "filterType": "group",
+                  "logicalOperator": "AND",
+                  "conditions": []
+                },
+                "promql_operations": []
+              },
+              "config": {
+                "promql_legend": "{{projection}}",
+                "query_label": ""
+              }
+            }
+          ],
+          "layout": {
+            "x": 0,
+            "y": 0,
+            "w": 96,
+            "h": 20,
+            "i": 1
+          },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        },
+        {
+          "id": "zitadel_projection_events",
+          "type": "line",
+          "title": "Eventos processados",
+          "description": "Eventos reduzidos por segundo, por sucesso e falha. Qualquer coisa em success=false merece ir aos logs.",
+          "config": {
+            "show_legends": true,
+            "legends_position": "right",
+            "unit": "custom",
+            "unit_custom": "ev/s",
+            "decimals": 3,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "sum by (success) (rate(projection_events_processed_total{namespace=\"zitadel\"}[$__rate_interval]))",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "projection_events_processed_total",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": {
+                  "filterType": "group",
+                  "logicalOperator": "AND",
+                  "conditions": []
+                },
+                "promql_operations": []
+              },
+              "config": {
+                "promql_legend": "success={{success}}",
+                "query_label": ""
+              }
+            }
+          ],
+          "layout": {
+            "x": 0,
+            "y": 20,
+            "w": 96,
+            "h": 20,
+            "i": 2
+          },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        },
+        {
+          "id": "zitadel_db_pool",
+          "type": "line",
+          "title": "Pool de ligações à base de dados",
+          "description": "Se as adquiridas encostam ao máximo, o ZITADEL passa a esperar por ligações antes de responder.",
+          "config": {
+            "show_legends": true,
+            "legends_position": "right",
+            "unit": "default",
+            "unit_custom": "",
+            "decimals": 0,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "zitadel_database_pool_acquired_conns{namespace=\"zitadel\"}",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "zitadel_database_pool_acquired_conns",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": {
+                  "filterType": "group",
+                  "logicalOperator": "AND",
+                  "conditions": []
+                },
+                "promql_operations": []
+              },
+              "config": {
+                "promql_legend": "adquiridas",
+                "query_label": ""
+              }
+            },
+            {
+              "query": "zitadel_database_pool_idle_conns{namespace=\"zitadel\"}",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "zitadel_database_pool_idle_conns",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": {
+                  "filterType": "group",
+                  "logicalOperator": "AND",
+                  "conditions": []
+                },
+                "promql_operations": []
+              },
+              "config": {
+                "promql_legend": "ociosas",
+                "query_label": ""
+              }
+            },
+            {
+              "query": "zitadel_database_pool_total_conns{namespace=\"zitadel\"}",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "zitadel_database_pool_total_conns",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": {
+                  "filterType": "group",
+                  "logicalOperator": "AND",
+                  "conditions": []
+                },
+                "promql_operations": []
+              },
+              "config": {
+                "promql_legend": "abertas",
+                "query_label": ""
+              }
+            },
+            {
+              "query": "zitadel_database_pool_max_conns{namespace=\"zitadel\"}",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "zitadel_database_pool_max_conns",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": {
+                  "filterType": "group",
+                  "logicalOperator": "AND",
+                  "conditions": []
+                },
+                "promql_operations": []
+              },
+              "config": {
+                "promql_legend": "máximo",
+                "query_label": ""
+              }
+            }
+          ],
+          "layout": {
+            "x": 0,
+            "y": 40,
+            "w": 96,
+            "h": 20,
+            "i": 3
+          },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        },
+        {
+          "id": "zitadel_db_pool_waits",
+          "type": "line",
+          "title": "Esperas por pool vazia",
+          "description": "Aquisições que esperaram por falta de ligação livre. Em repouso tem de ser zero.",
+          "config": {
+            "show_legends": false,
+            "legends_position": null,
+            "unit": "custom",
+            "unit_custom": "/s",
+            "decimals": 3,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "rate(zitadel_database_pool_empty_acquire_count_total{namespace=\"zitadel\"}[$__rate_interval])",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "zitadel_database_pool_empty_acquire_count_total",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": {
+                  "filterType": "group",
+                  "logicalOperator": "AND",
+                  "conditions": []
+                },
+                "promql_operations": []
+              },
+              "config": {
+                "promql_legend": "esperas/s",
+                "query_label": ""
+              }
+            }
+          ],
+          "layout": {
+            "x": 0,
+            "y": 60,
+            "w": 96,
+            "h": 20,
+            "i": 4
+          },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        },
+        {
+          "id": "zitadel_river_jobs",
+          "type": "line",
+          "title": "Jobs internos (River)",
+          "description": "A fila de trabalho do ZITADEL, por estado e fila. Jobs em erro acumulam-se aqui antes de se notar noutro sítio.",
+          "config": {
+            "show_legends": true,
+            "legends_position": "right",
+            "unit": "custom",
+            "unit_custom": "jobs/s",
+            "decimals": 3,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "sum by (status, queue) (rate(river_work_count_total{namespace=\"zitadel\"}[$__rate_interval]))",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "river_work_count_total",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": {
+                  "filterType": "group",
+                  "logicalOperator": "AND",
+                  "conditions": []
+                },
+                "promql_operations": []
+              },
+              "config": {
+                "promql_legend": "{{queue}} {{status}}",
+                "query_label": ""
+              }
+            }
+          ],
+          "layout": {
+            "x": 0,
+            "y": 80,
+            "w": 96,
+            "h": 20,
+            "i": 5
+          },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        },
+        {
+          "id": "zitadel_runtime",
+          "type": "line",
+          "title": "Runtime Go",
+          "description": "Goroutines e heap em MiB. Crescimento monótono ao longo de dias em qualquer um dos dois é fuga de memória, não carga.",
+          "config": {
+            "show_legends": true,
+            "legends_position": "right",
+            "unit": "default",
+            "unit_custom": "",
+            "decimals": 0,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "promql",
+          "queries": [
+            {
+              "query": "go_goroutines{namespace=\"zitadel\"}",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "go_goroutines",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": {
+                  "filterType": "group",
+                  "logicalOperator": "AND",
+                  "conditions": []
+                },
+                "promql_operations": []
+              },
+              "config": {
+                "promql_legend": "goroutines",
+                "query_label": ""
+              }
+            },
+            {
+              "query": "go_memstats_heap_inuse_bytes{namespace=\"zitadel\"} / 1048576",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "go_memstats_heap_inuse_bytes",
+                "stream_type": "metrics",
+                "x": [],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": {
+                  "filterType": "group",
+                  "logicalOperator": "AND",
+                  "conditions": []
+                },
+                "promql_operations": []
+              },
+              "config": {
+                "promql_legend": "heap MiB",
+                "query_label": ""
+              }
+            }
+          ],
+          "layout": {
+            "x": 0,
+            "y": 100,
+            "w": 96,
+            "h": 20,
+            "i": 6
+          },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        }
+      ]
+    },
+    {
+      "tabId": "logs",
+      "name": "Logs",
+      "panels": [
+        {
+          "id": "zitadel_log_volume",
+          "type": "line",
+          "title": "Volume de logs por pod",
+          "description": "Linhas por intervalo, por pod. Um pod a falar muito mais que os outros costuma ser um pod a reiniciar-se em ciclo.",
+          "config": {
+            "show_legends": true,
+            "legends_position": "right",
+            "unit": "default",
+            "unit_custom": "",
+            "decimals": 0,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "sql",
+          "queries": [
+            {
+              "query": "SELECT histogram(_timestamp) AS \"x_axis_1\", count(*) AS \"y_axis_1\", pod AS \"breakdown_1\" FROM \"default\" WHERE namespace = 'zitadel' GROUP BY x_axis_1, breakdown_1 ORDER BY x_axis_1",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "default",
+                "stream_type": "logs",
+                "x": [
+                  {
+                    "label": "Timestamp",
+                    "alias": "x_axis_1",
+                    "column": "_timestamp",
+                    "color": null,
+                    "aggregationFunction": "histogram"
+                  }
+                ],
+                "y": [
+                  {
+                    "label": "Linhas",
+                    "alias": "y_axis_1",
+                    "column": "_timestamp",
+                    "color": "#5960b2",
+                    "aggregationFunction": "count"
+                  }
+                ],
+                "z": [],
+                "breakdown": [
+                  {
+                    "label": "Pod",
+                    "alias": "breakdown_1",
+                    "column": "pod",
+                    "color": null,
+                    "aggregationFunction": null
+                  }
+                ],
+                "filter": {
+                  "filterType": "group",
+                  "logicalOperator": "AND",
+                  "conditions": []
+                },
+                "promql_operations": []
+              },
+              "config": {
+                "promql_legend": "",
+                "query_label": ""
+              }
+            }
+          ],
+          "layout": {
+            "x": 0,
+            "y": 0,
+            "w": 96,
+            "h": 20,
+            "i": 1
+          },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        },
+        {
+          "id": "zitadel_log_errors",
+          "type": "bar",
+          "title": "Erros por intervalo",
+          "description": "Linhas com level=ERROR. Os logs do ZITADEL são logfmt dentro do campo message, por isso isto é procura de texto e não um campo.",
+          "config": {
+            "show_legends": false,
+            "legends_position": null,
+            "unit": "default",
+            "unit_custom": "",
+            "decimals": 0,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "sql",
+          "queries": [
+            {
+              "query": "SELECT histogram(_timestamp) AS \"x_axis_1\", count(*) AS \"y_axis_1\" FROM \"default\" WHERE namespace = 'zitadel' AND message LIKE '%level=ERROR%' GROUP BY x_axis_1 ORDER BY x_axis_1",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "default",
+                "stream_type": "logs",
+                "x": [
+                  {
+                    "label": "Timestamp",
+                    "alias": "x_axis_1",
+                    "column": "_timestamp",
+                    "color": null,
+                    "aggregationFunction": "histogram"
+                  }
+                ],
+                "y": [
+                  {
+                    "label": "Erros",
+                    "alias": "y_axis_1",
+                    "column": "_timestamp",
+                    "color": "#b24a4a",
+                    "aggregationFunction": "count"
+                  }
+                ],
+                "z": [],
+                "breakdown": [],
+                "filter": {
+                  "filterType": "group",
+                  "logicalOperator": "AND",
+                  "conditions": []
+                },
+                "promql_operations": []
+              },
+              "config": {
+                "promql_legend": "",
+                "query_label": ""
+              }
+            }
+          ],
+          "layout": {
+            "x": 0,
+            "y": 20,
+            "w": 96,
+            "h": 20,
+            "i": 2
+          },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        },
+        {
+          "id": "zitadel_log_recent_errors",
+          "type": "table",
+          "title": "Erros recentes",
+          "description": "As últimas linhas de erro, em bruto.",
+          "config": {
+            "show_legends": false,
+            "legends_position": null,
+            "unit": "default",
+            "unit_custom": "",
+            "decimals": 0,
+            "base_map": null,
+            "map_view": null
+          },
+          "queryType": "sql",
+          "queries": [
+            {
+              "query": "SELECT _timestamp AS \"x_axis_1\", pod AS \"x_axis_2\", message AS \"x_axis_3\" FROM \"default\" WHERE namespace = 'zitadel' AND message LIKE '%level=ERROR%' ORDER BY _timestamp DESC LIMIT 100",
+              "vrlFunctionQuery": "",
+              "customQuery": true,
+              "fields": {
+                "stream": "default",
+                "stream_type": "logs",
+                "x": [
+                  {
+                    "label": "Quando",
+                    "alias": "x_axis_1",
+                    "column": "_timestamp",
+                    "color": null,
+                    "aggregationFunction": null
+                  },
+                  {
+                    "label": "Pod",
+                    "alias": "x_axis_2",
+                    "column": "pod",
+                    "color": null,
+                    "aggregationFunction": null
+                  },
+                  {
+                    "label": "Mensagem",
+                    "alias": "x_axis_3",
+                    "column": "message",
+                    "color": null,
+                    "aggregationFunction": null
+                  }
+                ],
+                "y": [],
+                "z": [],
+                "breakdown": [],
+                "filter": {
+                  "filterType": "group",
+                  "logicalOperator": "AND",
+                  "conditions": []
+                },
+                "promql_operations": []
+              },
+              "config": {
+                "promql_legend": "",
+                "query_label": ""
+              }
+            }
+          ],
+          "layout": {
+            "x": 0,
+            "y": 40,
+            "w": 96,
+            "h": 26,
+            "i": 3
+          },
+          "htmlContent": "",
+          "markdownContent": "",
+          "customChartContent": "option = {};"
+        }
+      ]
+    }
+  ],
+  "variables": {
+    "list": [],
+    "showDynamicFilters": true
+  },
+  "defaultDatetimeDuration": {
+    "type": "relative",
+    "relativeTimePeriod": "6h"
+  }
+}

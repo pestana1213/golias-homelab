@@ -185,6 +185,13 @@ spec:
           enabled: false
         grafana:
           enabled: false
+          # The chart creates a Loki datasource ConfigMap even with grafana disabled,
+          # marked isDefault: true. Prometheus is already the default in
+          # kube-prometheus-stack, and Grafana refuses to start with two defaults.
+          # Loki is declared there under additionalDataSources instead.
+          sidecar:
+            datasources:
+              enabled: false
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
