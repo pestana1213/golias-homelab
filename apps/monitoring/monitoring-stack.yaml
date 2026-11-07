@@ -61,6 +61,16 @@ spec:
             existingSecret: grafana-admin-secret
             userKey: admin-user
             passwordKey: admin-password
+          # Dashboard ConfigMaps land in the Grafana folder named by their
+          # grafana_folder annotation; see apps/monitoring/dashboards/grafana.
+          sidecar:
+            dashboards:
+              folderAnnotation: grafana_folder
+              provider:
+                foldersFromFilesStructure: true
+              # Applied to the dashboards this chart ships itself.
+              annotations:
+                grafana_folder: Kubernetes
           persistence:
             enabled: true
             size: 5Gi
@@ -102,7 +112,8 @@ spec:
               providers:
                 - name: default
                   orgId: 1
-                  folder: ""
+                  # The grafana.com dashboards below sit with the chart's own.
+                  folder: Kubernetes
                   type: file
                   disableDeletion: false
                   editable: true

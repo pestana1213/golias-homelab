@@ -1,0 +1,12 @@
+# Grafana folder "Apps": one dashboard per application running on the homelab.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+commonAnnotations:
+  grafana_folder: Apps
+
+resources:
+  - wealth-service-dashboard.yaml
+  - control-hub-dashboard.yaml
+  - golias-web-dashboard.yaml
+  - zitadel-dashboard.yaml

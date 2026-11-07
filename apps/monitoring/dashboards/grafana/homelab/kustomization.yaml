@@ -1,0 +1,10 @@
+# Grafana folder "Homelab": the cluster as a whole, rather than one application.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+commonAnnotations:
+  grafana_folder: Homelab
+
+resources:
+  - homelab-overview-dashboard.yaml
+  - kubernetes-logs-dashboard.yaml

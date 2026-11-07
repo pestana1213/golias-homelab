@@ -1,13 +1,18 @@
 # Grafana dashboards, one ConfigMap each. Grafana's dashboard sidecar loads every
 # ConfigMap labelled grafana_dashboard: "1" in the monitoring namespace.
+#
+# Each subdirectory is a folder in Grafana: its kustomization stamps the
+# grafana_folder annotation on every ConfigMap in it, and the sidecar
+# (folderAnnotation + foldersFromFilesStructure in monitoring-stack.yaml) files
+# the dashboard under that folder. To add a dashboard, drop the ConfigMap in the
+# right directory and list it in that directory's kustomization.
+#
+# The dashboards kube-prometheus-stack ships itself go to "Kubernetes", set by
+# grafana.sidecar.dashboards.annotations in monitoring-stack.yaml.
 # The OpenObserve dashboards in ../openobserve are imported by hand in its UI.
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - homelab-overview-dashboard.yaml
-  - kubernetes-logs-dashboard.yaml
-  - wealth-service-dashboard.yaml
-  - control-hub-dashboard.yaml
-  - golias-web-dashboard.yaml
-  - zitadel-dashboard.yaml
+  - apps
+  - homelab
