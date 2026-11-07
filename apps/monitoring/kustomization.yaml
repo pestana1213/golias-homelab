@@ -6,6 +6,5 @@ resources:
   - monitoring-stack.yaml
   - openobserve.yaml
   - grafana-ingress.yaml
-  - homelab-overview-dashboard.yaml
-  - kubernetes-logs-dashboard.yaml
+  - dashboards/grafana
   - externalsecret.yaml

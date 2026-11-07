@@ -1,0 +1,2663 @@
+# Generated from an OpenObserve dashboard. Grafana's dashboard sidecar picks up
+# every ConfigMap labelled grafana_dashboard: "1" in this namespace.
+# Edits made in the Grafana UI are not saved back here: export the JSON and paste it below.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wealth-service-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  wealth-service.json: |
+    {
+      "uid": "wealth-service",
+      "title": "Wealth Service - overview",
+      "description": "HTTP traffic, the transaction write path and the JVM/pool signals that explain them.",
+      "tags": [
+        "wealth-service",
+        "spring-boot"
+      ],
+      "editable": true,
+      "graphTooltip": 1,
+      "refresh": "1m",
+      "schemaVersion": 39,
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "timezone": "browser",
+      "templating": {
+        "list": [
+          {
+            "type": "custom",
+            "name": "app",
+            "label": "Environment",
+            "query": "Production : wealth-service, Load test : wealth-service-loadtest",
+            "multi": true,
+            "includeAll": false,
+            "current": {
+              "text": [
+                "Production"
+              ],
+              "value": [
+                "wealth-service"
+              ]
+            },
+            "options": [
+              {
+                "text": "Production",
+                "value": "wealth-service",
+                "selected": true
+              },
+              {
+                "text": "Load test",
+                "value": "wealth-service-loadtest",
+                "selected": false
+              }
+            ]
+          }
+        ]
+      },
+      "annotations": {
+        "list": []
+      },
+      "links": [
+        {
+          "title": "OpenObserve (logs, RUM)",
+          "type": "link",
+          "icon": "external link",
+          "url": "https://openobserve.tail654c62.ts.net",
+          "targetBlank": true
+        }
+      ],
+      "panels": [
+        {
+          "id": 1,
+          "type": "row",
+          "title": "Traffic",
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "panels": []
+        },
+        {
+          "id": 2,
+          "title": "Requests/s",
+          "description": "Total server-side request rate. Excludes /actuator (Prometheus scrapes and k8s probes).",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 1,
+            "w": 4,
+            "h": 5
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "sum by (application) (rate(http_server_requests_seconds_count{application=~\"${app:pipe}\", uri!~\"/actuator.*\"}[5m]))",
+              "legendFormat": "{{application}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "type": "stat",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqps",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 2
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "textMode": "auto",
+            "orientation": "auto"
+          }
+        },
+        {
+          "id": 3,
+          "title": "5xx ratio",
+          "description": "Share of requests ending in a 5xx. 0 means healthy. Excludes /actuator (Prometheus scrapes and k8s probes).",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 4,
+            "y": 1,
+            "w": 4,
+            "h": 5
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "(sum by (application) (rate(http_server_requests_seconds_count{application=~\"${app:pipe}\", uri!~\"/actuator.*\", status=~\"5..\"}[5m])) or 0 * sum by (application) (rate(http_server_requests_seconds_count{application=~\"${app:pipe}\", uri!~\"/actuator.*\"}[5m]))) / clamp_min(sum by (application) (rate(http_server_requests_seconds_count{application=~\"${app:pipe}\", uri!~\"/actuator.*\"}[5m])), 0.000001)",
+              "legendFormat": "{{application}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "type": "stat",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 0.01
+                  }
+                ]
+              },
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 2
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "textMode": "auto",
+            "orientation": "auto"
+          }
+        },
+        {
+          "id": 4,
+          "title": "Latency p95",
+          "description": "p95 across all routes over 5m, excluding /actuator.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 8,
+            "y": 1,
+            "w": 4,
+            "h": 5
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "histogram_quantile(0.95, sum by (le, application) (rate(http_server_requests_seconds_bucket{application=~\"${app:pipe}\", uri!~\"/actuator.*\"}[5m])))",
+              "legendFormat": "{{application}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "type": "stat",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 3
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "textMode": "auto",
+            "orientation": "auto"
+          }
+        },
+        {
+          "id": 5,
+          "title": "Heap after GC",
+          "description": "Long-lived heap occupancy after the last GC. A rising baseline over hours points at a leak.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 12,
+            "y": 1,
+            "w": 4,
+            "h": 5
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max by (application) (jvm_memory_usage_after_gc{application=~\"${app:pipe}\", area=\"heap\", pool=\"long-lived\"})",
+              "legendFormat": "{{application}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "type": "stat",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 0.7
+                  },
+                  {
+                    "color": "red",
+                    "value": 0.85
+                  }
+                ]
+              },
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 1
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "textMode": "auto",
+            "orientation": "auto"
+          }
+        },
+        {
+          "id": 6,
+          "title": "DB pool usage",
+          "description": "Active connections as a share of the pool max. Near 100% means requests start queueing for a connection.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 16,
+            "y": 1,
+            "w": 4,
+            "h": 5
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max by (application) (hikaricp_connections_active{application=~\"${app:pipe}\"}) / clamp_min(max by (application) (hikaricp_connections_max{application=~\"${app:pipe}\"}), 1)",
+              "legendFormat": "{{application}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "type": "stat",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "orange",
+                    "value": 0.7
+                  },
+                  {
+                    "color": "red",
+                    "value": 0.9
+                  }
+                ]
+              },
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 0
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "textMode": "auto",
+            "orientation": "auto"
+          }
+        },
+        {
+          "id": 7,
+          "title": "Uptime",
+          "description": "Process uptime.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 20,
+            "y": 1,
+            "w": 4,
+            "h": 5
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max by (application) (process_uptime_seconds{application=~\"${app:pipe}\"})",
+              "legendFormat": "{{application}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "type": "stat",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 0
+            },
+            "overrides": []
+          },
+          "options": {
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "textMode": "auto",
+            "orientation": "auto"
+          }
+        },
+        {
+          "id": 8,
+          "title": "Request rate by route and status",
+          "description": "Server-side request rate split by templated uri and status. Excludes /actuator (Prometheus scrapes and k8s probes).",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 6,
+            "w": 12,
+            "h": 8
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "sum by (uri, status, application) (rate(http_server_requests_seconds_count{application=~\"${app:pipe}\", uri!~\"/actuator.*\"}[5m]))",
+              "legendFormat": "{{application}} {{uri}} {{status}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "type": "timeseries",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqps",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "color": {
+                "mode": "palette-classic"
+              },
+              "decimals": 2,
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 1,
+                "fillOpacity": 10,
+                "gradientMode": "opacity",
+                "showPoints": "never",
+                "spanNulls": false,
+                "axisSoftMin": 0
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "showLegend": true,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 9,
+          "title": "Server error ratio",
+          "description": "Share of requests ending in a 5xx. Uses http_server_requests_seconds_count; a flat zero line means no errors. Excludes /actuator (Prometheus scrapes and k8s probes).",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 12,
+            "y": 6,
+            "w": 12,
+            "h": 8
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "(sum by (application) (rate(http_server_requests_seconds_count{application=~\"${app:pipe}\", uri!~\"/actuator.*\", status=~\"5..\"}[5m])) or 0 * sum by (application) (rate(http_server_requests_seconds_count{application=~\"${app:pipe}\", uri!~\"/actuator.*\"}[5m]))) / clamp_min(sum by (application) (rate(http_server_requests_seconds_count{application=~\"${app:pipe}\", uri!~\"/actuator.*\"}[5m])), 0.000001)",
+              "legendFormat": "{{application}} 5xx ratio",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "type": "timeseries",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percentunit",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "color": {
+                "mode": "palette-classic"
+              },
+              "decimals": 2,
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 1,
+                "fillOpacity": 10,
+                "gradientMode": "opacity",
+                "showPoints": "never",
+                "spanNulls": false,
+                "axisSoftMin": 0
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "showLegend": true,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 10,
+          "title": "Latency, mean and max, all routes",
+          "description": "Mean is sum/count. Max is the per-scrape-window maximum. Excludes /actuator (Prometheus scrapes and k8s probes).",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 14,
+            "w": 12,
+            "h": 8
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "sum by (application) (rate(http_server_requests_seconds_sum{application=~\"${app:pipe}\", uri!~\"/actuator.*\"}[5m])) / clamp_min(sum by (application) (rate(http_server_requests_seconds_count{application=~\"${app:pipe}\", uri!~\"/actuator.*\"}[5m])), 0.000001)",
+              "legendFormat": "{{application}} mean",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "max by (application) (http_server_requests_seconds_max{application=~\"${app:pipe}\", uri!~\"/actuator.*\"})",
+              "legendFormat": "{{application}} max",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "type": "timeseries",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "color": {
+                "mode": "palette-classic"
+              },
+              "decimals": 2,
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 1,
+                "fillOpacity": 10,
+                "gradientMode": "opacity",
+                "showPoints": "never",
+                "spanNulls": false,
+                "axisSoftMin": 0
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "showLegend": true,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 11,
+          "title": "Latency p95 and p99, all routes",
+          "description": "Needs management.metrics.distribution.percentiles-histogram.http.server.requests=true. Empty without it. Excludes /actuator (Prometheus scrapes and k8s probes).",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 12,
+            "y": 14,
+            "w": 12,
+            "h": 8
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "histogram_quantile(0.95, sum by (le, application) (rate(http_server_requests_seconds_bucket{application=~\"${app:pipe}\", uri!~\"/actuator.*\"}[5m])))",
+              "legendFormat": "{{application}} p95",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "histogram_quantile(0.99, sum by (le, application) (rate(http_server_requests_seconds_bucket{application=~\"${app:pipe}\", uri!~\"/actuator.*\"}[5m])))",
+              "legendFormat": "{{application}} p99",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "type": "timeseries",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "color": {
+                "mode": "palette-classic"
+              },
+              "decimals": 2,
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 1,
+                "fillOpacity": 10,
+                "gradientMode": "opacity",
+                "showPoints": "never",
+                "spanNulls": false,
+                "axisSoftMin": 0
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "showLegend": true,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 12,
+          "title": "Latency p95 by route",
+          "description": "Where the slow routes are. p95, so a route that is usually fast but sometimes stalls still shows up.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 22,
+            "w": 12,
+            "h": 8
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "histogram_quantile(0.95, sum by (le, uri, application) (rate(http_server_requests_seconds_bucket{application=~\"${app:pipe}\", uri!~\"/actuator.*\"}[5m])))",
+              "legendFormat": "{{application}} {{uri}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "type": "timeseries",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "color": {
+                "mode": "palette-classic"
+              },
+              "decimals": 2,
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 1,
+                "fillOpacity": 10,
+                "gradientMode": "opacity",
+                "showPoints": "never",
+                "spanNulls": false,
+                "axisSoftMin": 0
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "showLegend": true,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 13,
+          "title": "4xx and 5xx by route",
+          "description": "Error responses by route and status. The ratio panel says that something fails; this one says where. 409 on /transactions is expected contention.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 12,
+            "y": 22,
+            "w": 12,
+            "h": 8
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "sum by (uri, status, application) (rate(http_server_requests_seconds_count{application=~\"${app:pipe}\", uri!~\"/actuator.*\", status=~\"[45]..\"}[5m]))",
+              "legendFormat": "{{application}} {{uri}} {{status}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "type": "timeseries",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqps",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "color": {
+                "mode": "palette-classic"
+              },
+              "decimals": 2,
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 1,
+                "fillOpacity": 10,
+                "gradientMode": "opacity",
+                "showPoints": "never",
+                "spanNulls": false,
+                "axisSoftMin": 0
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "showLegend": true,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 14,
+          "title": "Dashboard query duration by result, mean",
+          "description": "Time inside GetDashboardAction only. result=not_found returns before any query runs.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 30,
+            "w": 12,
+            "h": 8
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "sum by (result, application) (rate(wealth_dashboard_duration_seconds_sum{application=~\"${app:pipe}\"}[5m])) / clamp_min(sum by (result, application) (rate(wealth_dashboard_duration_seconds_count{application=~\"${app:pipe}\"}[5m])), 0.000001)",
+              "legendFormat": "{{application}} {{result}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "type": "timeseries",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "color": {
+                "mode": "palette-classic"
+              },
+              "decimals": 2,
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 1,
+                "fillOpacity": 10,
+                "gradientMode": "opacity",
+                "showPoints": "never",
+                "spanNulls": false,
+                "axisSoftMin": 0
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "showLegend": true,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 15,
+          "title": "Dashboard failures by reason",
+          "description": "reason=not_found is a missing user id; reason=error is an unexpected failure and the one to page on. Empty means no failures yet.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 12,
+            "y": 30,
+            "w": 12,
+            "h": 8
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "sum by (reason, application) (rate(wealth_dashboard_failures_total{application=~\"${app:pipe}\"}[5m]))",
+              "legendFormat": "{{application}} {{reason}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "type": "timeseries",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "suffix: errors/s",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "color": {
+                "mode": "palette-classic"
+              },
+              "decimals": 2,
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 1,
+                "fillOpacity": 10,
+                "gradientMode": "opacity",
+                "showPoints": "never",
+                "spanNulls": false,
+                "axisSoftMin": 0
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "showLegend": true,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 16,
+          "title": "Dashboard query duration p95 and p99",
+          "description": "Time inside GetDashboardAction for result=ok. The dashboard runs several queries in one REPEATABLE READ snapshot; the tail is what the user waits for.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 0,
+            "y": 38,
+            "w": 12,
+            "h": 8
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "histogram_quantile(0.95, sum by (le, application) (rate(wealth_dashboard_duration_seconds_bucket{application=~\"${app:pipe}\", result=\"ok\"}[5m])))",
+              "legendFormat": "{{application}} p95",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "histogram_quantile(0.99, sum by (le, application) (rate(wealth_dashboard_duration_seconds_bucket{application=~\"${app:pipe}\", result=\"ok\"}[5m])))",
+              "legendFormat": "{{application}} p99",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "type": "timeseries",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "color": {
+                "mode": "palette-classic"
+              },
+              "decimals": 3,
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 1,
+                "fillOpacity": 10,
+                "gradientMode": "opacity",
+                "showPoints": "never",
+                "spanNulls": false,
+                "axisSoftMin": 0
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "showLegend": true,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 17,
+          "title": "Actuator traffic (scrapes and probes)",
+          "description": "What the other panels leave out. A gap here means Prometheus stopped scraping or the probes stopped, not that the service is idle.",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "gridPos": {
+            "x": 12,
+            "y": 38,
+            "w": 12,
+            "h": 8
+          },
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "expr": "sum by (uri, application) (rate(http_server_requests_seconds_count{application=~\"${app:pipe}\", uri=~\"/actuator.*\"}[5m]))",
+              "legendFormat": "{{application}} {{uri}}",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "type": "timeseries",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "reqps",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  }
+                ]
+              },
+              "color": {
+                "mode": "palette-classic"
+              },
+              "decimals": 2,
+              "custom": {
+                "drawStyle": "line",
+                "lineWidth": 1,
+                "fillOpacity": 10,
+                "gradientMode": "opacity",
+                "showPoints": "never",
+                "spanNulls": false,
+                "axisSoftMin": 0
+              }
+            },
+            "overrides": []
+          },
+          "options": {
+            "legend": {
+              "showLegend": true,
+              "displayMode": "list",
+              "placement": "bottom",
+              "calcs": []
+            },
+            "tooltip": {
+              "mode": "multi",
+              "sort": "desc"
+            }
+          }
+        },
+        {
+          "id": 18,
+          "type": "row",
+          "title": "Transactions",
+          "collapsed": true,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 46
+          },
+          "panels": [
+            {
+              "id": 19,
+              "title": "Transaction outcomes per second",
+              "description": "created = committed; invalid = rejected request shape (400); conflict = lost row lock (409).",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "gridPos": {
+                "x": 0,
+                "y": 47,
+                "w": 12,
+                "h": 8
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "expr": "sum by (outcome, application) (rate(wealth_transactions_total{application=~\"${app:pipe}\"}[5m]))",
+                  "legendFormat": "{{application}} {{outcome}}",
+                  "range": true,
+                  "refId": "A"
+                }
+              ],
+              "type": "timeseries",
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "ops",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "decimals": 2,
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineWidth": 1,
+                    "fillOpacity": 10,
+                    "gradientMode": "opacity",
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "axisSoftMin": 0
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "showLegend": true,
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "calcs": []
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            },
+            {
+              "id": 20,
+              "title": "Conflict ratio",
+              "description": "Share of attempts lost to FOR UPDATE NOWAIT contention; clients are expected to retry. Flat zero means no contention.",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "gridPos": {
+                "x": 12,
+                "y": 47,
+                "w": 12,
+                "h": 8
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "expr": "(sum by (application) (rate(wealth_transactions_total{application=~\"${app:pipe}\", outcome=\"conflict\"}[5m])) or 0 * sum by (application) (rate(wealth_transactions_total{application=~\"${app:pipe}\"}[5m]))) / clamp_min(sum by (application) (rate(wealth_transactions_total{application=~\"${app:pipe}\"}[5m])), 0.000001)",
+                  "legendFormat": "{{application}} conflict ratio",
+                  "range": true,
+                  "refId": "A"
+                }
+              ],
+              "type": "timeseries",
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "percentunit",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "decimals": 2,
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineWidth": 1,
+                    "fillOpacity": 10,
+                    "gradientMode": "opacity",
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "axisSoftMin": 0
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "showLegend": true,
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "calcs": []
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            },
+            {
+              "id": 21,
+              "title": "Transaction duration, mean and max, by outcome",
+              "description": "A rising max on outcome=conflict with a flat mean means one write is blocking on a row lock.",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "gridPos": {
+                "x": 0,
+                "y": 55,
+                "w": 12,
+                "h": 8
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "expr": "sum by (outcome, application) (rate(wealth_transaction_duration_seconds_sum{application=~\"${app:pipe}\"}[5m])) / clamp_min(sum by (outcome, application) (rate(wealth_transaction_duration_seconds_count{application=~\"${app:pipe}\"}[5m])), 0.000001)",
+                  "legendFormat": "{{application}} {{outcome}} mean",
+                  "range": true,
+                  "refId": "A"
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "expr": "max by (outcome, application) (wealth_transaction_duration_seconds_max{application=~\"${app:pipe}\"})",
+                  "legendFormat": "{{application}} {{outcome}} max",
+                  "range": true,
+                  "refId": "B"
+                }
+              ],
+              "type": "timeseries",
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "s",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "decimals": 2,
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineWidth": 1,
+                    "fillOpacity": 10,
+                    "gradientMode": "opacity",
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "axisSoftMin": 0
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "showLegend": true,
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "calcs": []
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            },
+            {
+              "id": 22,
+              "title": "Transaction duration p95 by outcome",
+              "description": "Buckets come from the timer's publishPercentileHistogram.",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "gridPos": {
+                "x": 12,
+                "y": 55,
+                "w": 12,
+                "h": 8
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "expr": "histogram_quantile(0.95, sum by (le, outcome, application) (rate(wealth_transaction_duration_seconds_bucket{application=~\"${app:pipe}\"}[5m])))",
+                  "legendFormat": "{{application}} p95 {{outcome}}",
+                  "range": true,
+                  "refId": "A"
+                }
+              ],
+              "type": "timeseries",
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "s",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "decimals": 2,
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineWidth": 1,
+                    "fillOpacity": 10,
+                    "gradientMode": "opacity",
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "axisSoftMin": 0
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "showLegend": true,
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "calcs": []
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            },
+            {
+              "id": 23,
+              "title": "POST /transactions latency, mean and max",
+              "description": "Full HTTP latency of the write endpoint, to compare with the in-action timer. Filtered on POST: GET /transactions shares the uri and would mix list reads in.",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "gridPos": {
+                "x": 0,
+                "y": 63,
+                "w": 12,
+                "h": 8
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "expr": "sum by (application) (rate(http_server_requests_seconds_sum{application=~\"${app:pipe}\", uri=\"/transactions\", method=\"POST\"}[5m])) / clamp_min(sum by (application) (rate(http_server_requests_seconds_count{application=~\"${app:pipe}\", uri=\"/transactions\", method=\"POST\"}[5m])), 0.000001)",
+                  "legendFormat": "{{application}} mean",
+                  "range": true,
+                  "refId": "A"
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "expr": "max by (application) (http_server_requests_seconds_max{application=~\"${app:pipe}\", uri=\"/transactions\", method=\"POST\"})",
+                  "legendFormat": "{{application}} max",
+                  "range": true,
+                  "refId": "B"
+                }
+              ],
+              "type": "timeseries",
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "s",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "decimals": 2,
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineWidth": 1,
+                    "fillOpacity": 10,
+                    "gradientMode": "opacity",
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "axisSoftMin": 0
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "showLegend": true,
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "calcs": []
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            },
+            {
+              "id": 24,
+              "title": "POST /transactions responses by status",
+              "description": "201 committed, 400 invalid, 409 lock contention, 500 unexpected. Alert on 500.",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "gridPos": {
+                "x": 12,
+                "y": 63,
+                "w": 12,
+                "h": 8
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "expr": "sum by (status, application) (rate(http_server_requests_seconds_count{application=~\"${app:pipe}\", uri=\"/transactions\", method=\"POST\"}[5m]))",
+                  "legendFormat": "{{application}} HTTP {{status}}",
+                  "range": true,
+                  "refId": "A"
+                }
+              ],
+              "type": "timeseries",
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "reqps",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "decimals": 2,
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineWidth": 1,
+                    "fillOpacity": 10,
+                    "gradientMode": "opacity",
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "axisSoftMin": 0
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "showLegend": true,
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "calcs": []
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            },
+            {
+              "id": 25,
+              "title": "Reversals by status",
+              "description": "POST /transactions/{transactionId}/reversal. Not covered by wealth_transactions_total, so HTTP status is the only signal.",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "gridPos": {
+                "x": 0,
+                "y": 71,
+                "w": 12,
+                "h": 8
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "expr": "sum by (status, application) (rate(http_server_requests_seconds_count{application=~\"${app:pipe}\", uri=\"/transactions/{transactionId}/reversal\"}[5m]))",
+                  "legendFormat": "{{application}} HTTP {{status}}",
+                  "range": true,
+                  "refId": "A"
+                }
+              ],
+              "type": "timeseries",
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "reqps",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "decimals": 2,
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineWidth": 1,
+                    "fillOpacity": 10,
+                    "gradientMode": "opacity",
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "axisSoftMin": 0
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "showLegend": true,
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "calcs": []
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            },
+            {
+              "id": 26,
+              "title": "Other writes by route and status",
+              "description": "Accounts, buckets, goals and valuations: every POST, PATCH and DELETE outside /transactions.",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "gridPos": {
+                "x": 12,
+                "y": 71,
+                "w": 12,
+                "h": 8
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "expr": "sum by (method, uri, status, application) (rate(http_server_requests_seconds_count{application=~\"${app:pipe}\", method=~\"POST|PATCH|DELETE\", uri!~\"/transactions.*|/actuator.*\"}[5m]))",
+                  "legendFormat": "{{application}} {{method}} {{uri}} {{status}}",
+                  "range": true,
+                  "refId": "A"
+                }
+              ],
+              "type": "timeseries",
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "reqps",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "decimals": 2,
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineWidth": 1,
+                    "fillOpacity": 10,
+                    "gradientMode": "opacity",
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "axisSoftMin": 0
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "showLegend": true,
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "calcs": []
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "id": 27,
+          "type": "row",
+          "title": "JVM, pool and process",
+          "collapsed": true,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 79
+          },
+          "panels": [
+            {
+              "id": 28,
+              "title": "JVM heap used against max",
+              "description": "A sawtooth returning to baseline is healthy; a ratcheting floor is a retention problem.",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "gridPos": {
+                "x": 0,
+                "y": 80,
+                "w": 12,
+                "h": 8
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "expr": "sum by (application) (jvm_memory_used_bytes{application=~\"${app:pipe}\", area=\"heap\"})",
+                  "legendFormat": "{{application}} heap used",
+                  "range": true,
+                  "refId": "A"
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "expr": "sum by (application) (jvm_memory_max_bytes{application=~\"${app:pipe}\", area=\"heap\"} > 0)",
+                  "legendFormat": "{{application}} heap max",
+                  "range": true,
+                  "refId": "B"
+                }
+              ],
+              "type": "timeseries",
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "bytes",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "decimals": 2,
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineWidth": 1,
+                    "fillOpacity": 10,
+                    "gradientMode": "opacity",
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "axisSoftMin": 0
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "showLegend": true,
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "calcs": []
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            },
+            {
+              "id": 29,
+              "title": "Heap after GC (long-lived pool)",
+              "description": "Occupancy of the old generation after each collection. The leak indicator.",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "gridPos": {
+                "x": 12,
+                "y": 80,
+                "w": 12,
+                "h": 8
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "expr": "max by (application) (jvm_memory_usage_after_gc{application=~\"${app:pipe}\", area=\"heap\", pool=\"long-lived\"})",
+                  "legendFormat": "{{application}} after GC",
+                  "range": true,
+                  "refId": "A"
+                }
+              ],
+              "type": "timeseries",
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "percentunit",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "decimals": 2,
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineWidth": 1,
+                    "fillOpacity": 10,
+                    "gradientMode": "opacity",
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "axisSoftMin": 0
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "showLegend": true,
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "calcs": []
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            },
+            {
+              "id": 30,
+              "title": "JVM threads",
+              "description": "Names are jvm_threads_live_threads / jvm_threads_daemon_threads on Spring Boot 4.",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "gridPos": {
+                "x": 0,
+                "y": 88,
+                "w": 12,
+                "h": 8
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "expr": "max by (application) (jvm_threads_live_threads{application=~\"${app:pipe}\"})",
+                  "legendFormat": "{{application}} threads live",
+                  "range": true,
+                  "refId": "A"
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "expr": "max by (application) (jvm_threads_daemon_threads{application=~\"${app:pipe}\"})",
+                  "legendFormat": "{{application}} daemon",
+                  "range": true,
+                  "refId": "B"
+                }
+              ],
+              "type": "timeseries",
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "none",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "decimals": 0,
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineWidth": 1,
+                    "fillOpacity": 10,
+                    "gradientMode": "opacity",
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "axisSoftMin": 0
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "showLegend": true,
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "calcs": []
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            },
+            {
+              "id": 31,
+              "title": "GC pause, max per collection",
+              "description": "Max because the GC pause timer does not guarantee buckets.",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "gridPos": {
+                "x": 12,
+                "y": 88,
+                "w": 12,
+                "h": 8
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "expr": "max by (application) (jvm_gc_pause_seconds_max{application=~\"${app:pipe}\"})",
+                  "legendFormat": "{{application}} max pause",
+                  "range": true,
+                  "refId": "A"
+                }
+              ],
+              "type": "timeseries",
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "s",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "decimals": 2,
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineWidth": 1,
+                    "fillOpacity": 10,
+                    "gradientMode": "opacity",
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "axisSoftMin": 0
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "showLegend": true,
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "calcs": []
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            },
+            {
+              "id": 32,
+              "title": "GC time ratio",
+              "description": "Seconds spent in GC pauses per second. Sum across all collectors/causes.",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "gridPos": {
+                "x": 0,
+                "y": 96,
+                "w": 12,
+                "h": 8
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "expr": "sum by (application) (rate(jvm_gc_pause_seconds_sum{application=~\"${app:pipe}\"}[5m]))",
+                  "legendFormat": "{{application}} GC time ratio",
+                  "range": true,
+                  "refId": "A"
+                }
+              ],
+              "type": "timeseries",
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "percentunit",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "decimals": 2,
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineWidth": 1,
+                    "fillOpacity": 10,
+                    "gradientMode": "opacity",
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "axisSoftMin": 0
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "showLegend": true,
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "calcs": []
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            },
+            {
+              "id": 33,
+              "title": "Allocation rate",
+              "description": "Young-gen allocation rate. Rising with GC pauses points at per-request allocation, not a leak.",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "gridPos": {
+                "x": 12,
+                "y": 96,
+                "w": 12,
+                "h": 8
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "expr": "sum by (application) (rate(jvm_gc_memory_allocated_bytes_total{application=~\"${app:pipe}\"}[5m]))",
+                  "legendFormat": "{{application}} allocated",
+                  "range": true,
+                  "refId": "A"
+                }
+              ],
+              "type": "timeseries",
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "Bps",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "decimals": 2,
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineWidth": 1,
+                    "fillOpacity": 10,
+                    "gradientMode": "opacity",
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "axisSoftMin": 0
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "showLegend": true,
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "calcs": []
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            },
+            {
+              "id": 34,
+              "title": "Database connection pool",
+              "description": "Pending near max with growing acquire time means the pool is the bottleneck; timeouts are the hard failure.",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "gridPos": {
+                "x": 0,
+                "y": 104,
+                "w": 12,
+                "h": 8
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "expr": "max by (application) (hikaricp_connections_active{application=~\"${app:pipe}\"})",
+                  "legendFormat": "{{application}} in use",
+                  "range": true,
+                  "refId": "A"
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "expr": "max by (application) (hikaricp_connections_idle{application=~\"${app:pipe}\"})",
+                  "legendFormat": "{{application}} idle",
+                  "range": true,
+                  "refId": "B"
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "expr": "max by (application) (hikaricp_connections_max{application=~\"${app:pipe}\"})",
+                  "legendFormat": "{{application}} pool max",
+                  "range": true,
+                  "refId": "C"
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "expr": "max by (application) (hikaricp_connections_pending{application=~\"${app:pipe}\"})",
+                  "legendFormat": "{{application}} pending",
+                  "range": true,
+                  "refId": "D"
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "expr": "sum by (application) (rate(hikaricp_connections_timeout_total{application=~\"${app:pipe}\"}[5m]))",
+                  "legendFormat": "{{application}} timeouts/s",
+                  "range": true,
+                  "refId": "E"
+                }
+              ],
+              "type": "timeseries",
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "none",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "decimals": 0,
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineWidth": 1,
+                    "fillOpacity": 10,
+                    "gradientMode": "opacity",
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "axisSoftMin": 0
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "showLegend": true,
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "calcs": []
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            },
+            {
+              "id": 35,
+              "title": "Pool acquire latency",
+              "description": "Mean connection acquisition time; rises before active connections do.",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "gridPos": {
+                "x": 12,
+                "y": 104,
+                "w": 12,
+                "h": 8
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "expr": "sum by (application) (rate(hikaricp_connections_acquire_seconds_sum{application=~\"${app:pipe}\"}[5m])) / clamp_min(sum by (application) (rate(hikaricp_connections_acquire_seconds_count{application=~\"${app:pipe}\"}[5m])), 0.000001)",
+                  "legendFormat": "{{application}} mean acquire",
+                  "range": true,
+                  "refId": "A"
+                }
+              ],
+              "type": "timeseries",
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "s",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "decimals": 2,
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineWidth": 1,
+                    "fillOpacity": 10,
+                    "gradientMode": "opacity",
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "axisSoftMin": 0
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "showLegend": true,
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "calcs": []
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            },
+            {
+              "id": 36,
+              "title": "Process CPU",
+              "description": "process_cpu_usage is already a fraction of the whole machine (0-1), not of one core.",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "gridPos": {
+                "x": 0,
+                "y": 112,
+                "w": 12,
+                "h": 8
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "expr": "avg by (application) (process_cpu_usage{application=~\"${app:pipe}\"})",
+                  "legendFormat": "{{application}} process",
+                  "range": true,
+                  "refId": "A"
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "expr": "avg by (application) (system_cpu_usage{application=~\"${app:pipe}\"})",
+                  "legendFormat": "{{application}} system",
+                  "range": true,
+                  "refId": "B"
+                }
+              ],
+              "type": "timeseries",
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "percentunit",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "decimals": 2,
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineWidth": 1,
+                    "fillOpacity": 10,
+                    "gradientMode": "opacity",
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "axisSoftMin": 0
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "showLegend": true,
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "calcs": []
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            },
+            {
+              "id": 37,
+              "title": "Open file descriptors",
+              "description": "Steady growth means a descriptor leak.",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "gridPos": {
+                "x": 12,
+                "y": 112,
+                "w": 12,
+                "h": 8
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "expr": "sum by (application) (process_files_open_files{application=~\"${app:pipe}\"})",
+                  "legendFormat": "{{application}} open FDs",
+                  "range": true,
+                  "refId": "A"
+                }
+              ],
+              "type": "timeseries",
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "none",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "decimals": 0,
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineWidth": 1,
+                    "fillOpacity": 10,
+                    "gradientMode": "opacity",
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "axisSoftMin": 0
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "showLegend": true,
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "calcs": []
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            },
+            {
+              "id": 38,
+              "title": "Uptime",
+              "description": "A sawtooth here means restarts.",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "gridPos": {
+                "x": 0,
+                "y": 120,
+                "w": 12,
+                "h": 8
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "expr": "max by (application) (process_uptime_seconds{application=~\"${app:pipe}\"})",
+                  "legendFormat": "{{application}} uptime",
+                  "range": true,
+                  "refId": "A"
+                }
+              ],
+              "type": "timeseries",
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "s",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "decimals": 0,
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineWidth": 1,
+                    "fillOpacity": 10,
+                    "gradientMode": "opacity",
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "axisSoftMin": 0
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "showLegend": true,
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "calcs": []
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            },
+            {
+              "id": 39,
+              "title": "Container CPU, cores",
+              "description": "cAdvisor usage per pod, in cores. Unlike process_cpu_usage this is what counts against the pod's CPU limit. Not filtered by Environment: cAdvisor series carry no application label.",
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "gridPos": {
+                "x": 12,
+                "y": 120,
+                "w": 12,
+                "h": 8
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
+                  },
+                  "expr": "sum by (pod) (rate(container_cpu_usage_seconds_total{namespace=\"wealth-service\", container=\"wealth-service\"}[5m]))",
+                  "legendFormat": "{{pod}}",
+                  "range": true,
+                  "refId": "A"
+                }
+              ],
+              "type": "timeseries",
+              "fieldConfig": {
+                "defaults": {
+                  "unit": "suffix: cores",
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      }
+                    ]
+                  },
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "decimals": 2,
+                  "custom": {
+                    "drawStyle": "line",
+                    "lineWidth": 1,
+                    "fillOpacity": 10,
+                    "gradientMode": "opacity",
+                    "showPoints": "never",
+                    "spanNulls": false,
+                    "axisSoftMin": 0
+                  }
+                },
+                "overrides": []
+              },
+              "options": {
+                "legend": {
+                  "showLegend": true,
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "calcs": []
+                },
+                "tooltip": {
+                  "mode": "multi",
+                  "sort": "desc"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
